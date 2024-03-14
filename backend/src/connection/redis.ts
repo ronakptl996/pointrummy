@@ -55,11 +55,11 @@ const connectionCallback = async () => {
     let pubClient: any;
 
     // FOR Development Connection
+    pubClient = new IORedis(pubSubRedisConfig);
+    const subClient = pubClient.duplicate();
+
     client = createClient(redisConfig);
     client.connect();
-    pubClient = new IORedis(pubSubRedisConfig);
-
-    const subClient = pubClient.duplicate();
 
     function check() {
       if (counter == 2) {
@@ -82,6 +82,12 @@ const connectionCallback = async () => {
 
     pubClient.on("ready", () => {
       Logger.info(">> pubClient Connected");
+      counter += 1;
+      check();
+    });
+
+    subClient.on("ready", () => {
+      Logger.info(">> subClient Connected");
       counter += 1;
       check();
     });
