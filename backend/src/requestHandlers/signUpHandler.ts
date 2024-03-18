@@ -1,13 +1,15 @@
 import Logger from "../logger";
 import Lock from "../lock";
 import Errors from "../errors";
-import { NUMERICAL } from "../constants";
+import { EMPTY, EVENT, MESSAGES, NUMERICAL } from "../constants";
 import { signUpFormator } from "../InputDataFormator";
 import { ISignUpInput } from "../interfaces/signup";
 import { INewGTIResponse } from "../interfaces/tableConfig";
+import { tableGamePlayCache } from "../cache";
 import { createOrFindUser } from "../services/userPlayTable";
-import { verifyUserProfile } from "../clientsideAPI";
+import { checkBalance, verifyUserProfile } from "../clientsideAPI";
 import config from "../config";
+import commonEventEmitter from "../commonEventEmitter";
 
 const { MAXIMUM_TABLE_CREATE_LIMIT } = config.getConfig();
 
@@ -98,6 +100,96 @@ async function signUpHandler(
       "userProfile.tableIds.length :>>",
       userProfile.tableIds.length
     );
+
+    if (userProfile.tableIds.length >= MAXIMUM_TABLE_CREATE_LIMIT) {
+      Logger.info(
+        userId,
+        "userTableIds ::: tableIds ::>>",
+        userProfile.tableIds
+      );
+
+      let nonProdMsg = "FAILED!";
+
+      commonEventEmitter.emit(EVENT.SHOW_POPUP_CLIENT_SOCKET_EVENT, {
+        socket: socketId,
+        data: {
+          isPopup: true,
+          popupType: MESSAGES.ALERT_MESSAGE.TYPE.COMMON_POPUP,
+          title: nonProdMsg,
+          message: MESSAGES.ERROR.MAXIMUM_TABLE_ERROR_MSG,
+          tableId: userProfile.tableId,
+          buttonCounts: NUMERICAL.ONE,
+          button_text: [MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.EXIT],
+          button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED],
+          button_methods: [MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.EXIT],
+        },
+      });
+      return false;
+    }
+
+    // RECONNECTION CASE HANDLE
+    let freshSignUp = true;
+    let tableId = "";
+    if (userProfile.tableId != "") {
+      tableId = userProfile.tableId;
+    }
+    Logger.info(userId, "tableId :: ", tableId);
+    const tableGamePlay = await tableGamePlayCache.getTableGamePlay(tableId);
+
+    Logger.info(userId, "tableGamePlay :: ==>>>", tableGamePlay);
+    if (!tableGamePlay) {
+      freshSignUp = true;
+      tableId = EMPTY;
+    }
+
+    if (tableId && tableId !== "") {
+      // (IMPLEMENT)
+    } else {
+      // Check User Balance
+      let checkBalanceDetail: any = {};
+      checkBalanceDetail = await checkBalance(
+        { tournamentId: userProfile.lobbyId },
+        userProfile.authToken,
+        userProfile.socketId,
+        userId
+      );
+      Logger.info(userId, "checkBalanceDetail  :: >> ", checkBalanceDetail);
+
+      if (
+        checkBalanceDetail &&
+        checkBalanceDetail.userBalance.isInsufficiantBalance
+      ) {
+        console.log(
+          userId,
+          "isInsufficiantBalance :: >>",
+          checkBalanceDetail.userBalance.isInsufficiantBalance
+        );
+        let nonProdMsg = "Insufficient Balance !";
+        commonEventEmitter.emit(EVENT.SHOW_POPUP_CLIENT_SOCKET_EVENT, {
+          socket,
+          data: {
+            isPopup: true,
+            popupType: MESSAGES.ALERT_MESSAGE.TYPE.COMMON_POPUP,
+            title: nonProdMsg,
+            tableId: EMPTY,
+            message: MESSAGES.ERROR.INSUFFICIENT_BALANCE,
+            buttonCounts: NUMERICAL.ONE,
+            button_text: [MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.EXIT],
+            button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED],
+            button_methods: [MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.EXIT],
+            isReset: true,
+          },
+        });
+        return false;
+      } else if (
+        checkBalanceDetail &&
+        !checkBalanceDetail.userBalance.isInsufficiantBalance
+      ) {
+        freshSignUp = true;
+      } else {
+        throw new Error("Unable to check Balance data");
+      }
+    }
   } catch (error) {}
 }
 

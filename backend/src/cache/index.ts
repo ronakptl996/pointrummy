@@ -1,3 +1,4 @@
 import userProfileCache from "./userProfile";
+import tableGamePlayCache from "./tableGamePlay";
 
-export { userProfileCache };
+export { userProfileCache, tableGamePlayCache };
