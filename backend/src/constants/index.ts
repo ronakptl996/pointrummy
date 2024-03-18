@@ -9,6 +9,7 @@ const exportObject = Object.freeze({
   REDIS,
   EVENT,
   GAME_TYPE: "PointRummy",
+  EMPTY: "",
 });
 
 export = exportObject;

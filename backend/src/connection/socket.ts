@@ -5,8 +5,13 @@ import { REDIS, SOCKET } from "../constants";
 import global from "../global";
 import Logger from "../logger";
 import redis from "./redis";
+import {
+  getOnlinePlayerCount,
+  incrCounter,
+  setPlayerCounterInitialValue,
+} from "../cache/onlinePlayer";
 
-async function socket() {
+async function socket(io: any) {
   try {
     const { pubClient, subClient } = await redis.redisConnect();
 
@@ -14,11 +19,8 @@ async function socket() {
       process.exit(1);
     }
 
-    const io = new Server({
-      adapter: createAdapter(pubClient, subClient),
-    });
-
     global.IO = io;
+    await io.adapter(createAdapter(pubClient, subClient));
 
     io.on(SOCKET.CONNECTION, async (socket: any) => {
       Logger.info(
@@ -26,7 +28,24 @@ async function socket() {
         socket.id
       );
 
-      // (IMPLEMENT) GET ONLINE PLAYER COUNT
+      let getOnlinePlayerCountData = await getOnlinePlayerCount(
+        REDIS.ONLINEPLAYER
+      );
+      Logger.info("getOnlinePlayerCountData :>>", getOnlinePlayerCountData);
+
+      if (!getOnlinePlayerCountData) {
+        const counterIntialValue = await setPlayerCounterInitialValue(
+          REDIS.ONLINEPLAYER
+        );
+        console.log("const counterIntialValue >>", counterIntialValue);
+      }
+
+      let count = await incrCounter(REDIS.ONLINEPLAYER);
+      Logger.info("insertNewPlayer :: count ::>> ", count);
+
+      const token = socket.handshake.auth.token;
+      Logger.info("connectionCB token :>> ", token);
+      socket.authToken = token;
 
       socket.on(SOCKET.ERROR, function (err: any) {
         Logger.error(" SOCKET ERROR :: ", err);
@@ -44,6 +63,7 @@ async function socket() {
         Logger.warn(" SOCKET DISCONNECT ::", disc, "socketID::", socket.id);
       });
 
+      // Bind Request Handler
       socket.use(requestHandler.bind(socket));
     });
   } catch (error) {

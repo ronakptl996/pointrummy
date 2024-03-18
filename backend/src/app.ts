@@ -9,6 +9,7 @@ import server from "./connection/server";
 import redis from "./connection/redis";
 import socket from "./connection/socket";
 import Logger from "./logger";
+import Lock from "./lock";
 
 (async () => {
   try {
@@ -17,15 +18,26 @@ import Logger from "./logger";
     console.log("getConfig() ::>>", getConfig());
     const secureServer = await server.serverConnect;
 
+    /** redis and socket connection */
+    const socketConfig = {
+      transports: [SOCKET.WEBSOCKET, SOCKET.POLLING],
+      allowEIO3: true,
+      pingTimeout: 180000,
+      pingInterval: 5000,
+    };
+
+    const io = require("socket.io")(secureServer, socketConfig);
+
     const promise = await Promise.all([
       await redis.redisConnect(),
-      await socket.socketConnect(),
+      await socket.socketConnect(io),
     ]);
 
     const { client: redisClient } = promise[0];
     require("./commonEventHandlers/socket");
 
-    // LOCK (Implement)
+    // Initialize Lock
+    Lock.init(redisClient);
 
     const isLoganable = true;
     global.isLoganable = isLoganable;
