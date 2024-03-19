@@ -11,13 +11,12 @@ const getUserProfile = async (
   const key = `${REDIS.USER}:${userId}`;
   try {
     const userProfile = await redis.getValueFromKey<IUserProfileOutput>(key);
-
     if (userProfile)
       Joi.assert(userProfile, profileService.UserProfile.joiSchema());
     return userProfile;
   } catch (error) {
     Logger.error(userId, `Error in getUserProfile for key ${key}`, error);
-    throw new Error("get value error getUserProfile");
+    throw new Error("get value key error");
   }
 };
 

@@ -18,26 +18,11 @@ const setValueInKey = async (key: string, Data: any) => {
   });
 };
 
-// const getValueFromKey = async (key: string) => {
-//   console.log("Call getValueFromKey");
-
-//   return new Promise(function (resolve, reject) {
-//     global.redisClient.get(key, function (err: any, data: any) {
-//       console.log("getValueFromKey >> err", err);
-
-//       if (err) reject(err);
-//       console.log("getValueFromKey >> ", key, "-DATA >>", data);
-
-//       resolve(JSON.parse(data));
-//     });
-//   });
-// };
-
 const getValueFromKey = async <T>(key: string): Promise<T | null> => {
   return new Promise(function (resolve, reject) {
     global.redisClient
       .get(key)
-      .then((res: any) => resolve(res))
+      .then((res: any) => resolve(JSON.parse(res)))
       .catch((err: any) => reject(err));
   });
 };
@@ -46,9 +31,19 @@ const deleteKey = async (key: string) => global.redisClient.del(key);
 
 const setValueInKeyWithExpiry = async (key: string, obj: any) => {
   const exp: number = 2 * 60 * 60;
-  return global.redisClient.setex(key, exp, JSON.stringify(obj));
+
+  return new Promise(function (resolve, reject) {
+    global.redisClient
+      .set(key, JSON.stringify(obj))
+      .then((res: any) => {
+        global.redisClient.expire(key, exp);
+        resolve(res);
+      })
+      .catch((err: any) => reject(err));
+  });
 };
 
+// CHANGES FUNCTION to then
 const pushIntoQueue = async (key: string, element: any) => {
   return new Promise(function (resolve, reject) {
     global.redisClient.lpush(
@@ -62,6 +57,7 @@ const pushIntoQueue = async (key: string, element: any) => {
   });
 };
 
+// CHANGES FUNCTION to then
 const popFromQueue = async (key: string) => {
   return new Promise(function (resolve, reject) {
     global.redisClient.lpop(

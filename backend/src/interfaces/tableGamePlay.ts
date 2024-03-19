@@ -1,12 +1,17 @@
 import { ISeats } from "./signup";
 
-export interface IDiscardedCardsObjInterface {
+export interface IDefaultBaseTable {
+  tableState: string;
+  seats: Array<ISeats>;
+}
+
+export interface IDiscardedCardsObj {
   userId: string;
   card: string;
   seatIndex: number;
 }
 
-export interface IDefaultTableGamePlayInterface {
+export interface IDefaultTableGamePlay {
   _id: string;
   trumpCard: Array<string>;
   closedDeck: Array<string>;
@@ -21,7 +26,7 @@ export interface IDefaultTableGamePlayInterface {
   finishCount: Array<string>;
   isTurn: boolean;
   isnextRound: boolean;
-  discardedCardsObj: Array<IDiscardedCardsObjInterface>;
+  discardedCardsObj: Array<IDiscardedCardsObj>;
   potValue: number;
   currentTurn: string;
   totalPickCount: number;

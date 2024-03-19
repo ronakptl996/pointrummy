@@ -1,10 +1,17 @@
+import config from "../config";
 import { ObjectId } from "mongodb";
+import { GetRandomInt } from "../common";
+import { EMPTY, NUMERICAL, TABLE_STATE } from "../constants";
 import {
   IUserProfileDataInput,
   IUserProfileOutput,
 } from "../interfaces/userProfile";
-import { GetRandomInt } from "../common";
-import { EMPTY } from "../constants";
+import { ICreateTable } from "../interfaces/signup";
+import { IDefaultTableConfig } from "../interfaces/tableConfig";
+import { IDefaultTableGamePlay } from "../interfaces/tableGamePlay";
+
+const { GAME_START_TIMER, USER_TURN_TIMER, SECONDARY_TIMER, DECLARE_TIMER } =
+  config.getConfig();
 
 const defaultUserProfile = (userData: any): IUserProfileOutput => {
   const currentTimeStamp = new Date().toString();
@@ -41,4 +48,62 @@ const defaultUserProfile = (userData: any): IUserProfileOutput => {
   };
 };
 
-export { defaultUserProfile };
+const defaultTableData = (signUpData: ICreateTable): IDefaultTableConfig => {
+  const currentTimeStamp = new Date();
+  return {
+    _id: new ObjectId().toString(),
+    gameType: signUpData.gameType,
+    currentRound: NUMERICAL.ONE,
+    lobbyId: signUpData.lobbyId,
+    gameId: signUpData.gameId,
+    multiWinner: false,
+    maximumPoints: NUMERICAL.EIGHTY,
+    minPlayer: signUpData.minPlayer || NUMERICAL.TWO,
+    noOfPlayer: signUpData.noOfPlayer,
+    gameStartTimer: Number(GAME_START_TIMER),
+    userTurnTimer: Number(USER_TURN_TIMER),
+    secondaryTimer: Number(SECONDARY_TIMER),
+    declareTimer: Number(DECLARE_TIMER),
+    entryFee: signUpData.entryFee,
+    moneyMode: signUpData.moneyMode,
+    numberOfDeck: NUMERICAL.TWO,
+    createdAt: currentTimeStamp.toString(),
+    updatedAt: currentTimeStamp.toString(),
+  };
+};
+
+const defaultTableGamePlayData = (gameType: string): IDefaultTableGamePlay => {
+  const currentTimeStamp = new Date();
+
+  return {
+    _id: new ObjectId().toString(),
+    trumpCard: [],
+    closedDeck: [],
+    opendDeck: [],
+    finishDeck: [],
+    turnCount: NUMERICAL.ZERO,
+    tossWinPlayer: NUMERICAL.MINUS_ONE,
+    dealerPlayer: NUMERICAL.MINUS_ONE,
+    declareingPlayer: EMPTY,
+    validDeclaredPlayer: EMPTY,
+    validDeclaredPlayerSI: NUMERICAL.ZERO,
+    finishCount: [],
+    isTurn: false,
+    isnextRound: false,
+    discardedCardsObj: [],
+    potValue: NUMERICAL.ZERO,
+    currentTurn: EMPTY,
+    totalPickCount: NUMERICAL.ZERO,
+    currentTurnSeatIndex: NUMERICAL.MINUS_ONE,
+    currentPlayerInTable: NUMERICAL.ZERO,
+    tableState: TABLE_STATE.WAITING_FOR_PLAYERS,
+    seats: [],
+    tableCurrentTimer: NUMERICAL.ZERO,
+    gameType: gameType,
+    isSeconderyTimer: false,
+    createdAt: currentTimeStamp.toString(),
+    updatedAt: currentTimeStamp.toString(),
+  };
+};
+
+export { defaultUserProfile, defaultTableData, defaultTableGamePlayData };

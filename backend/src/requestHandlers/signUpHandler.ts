@@ -209,20 +209,7 @@ async function signUpHandler(
       console.log("findTableInput >>", findTableInput);
       console.log("userProfile >>", userProfile);
 
-      // lock = await Lock.getLock().acquire([signUpData.lobbyId], 2000);
-      const redLock = Lock.getLock(); // Retrieve the RedLock instance
-      console.log("REDLOCK >>>>", redLock);
-
-      if (redLock) {
-        try {
-          lock = await redLock.acquire([signUpData.lobbyId], 2000);
-          console.log("Lock acquired successfully.");
-        } catch (error) {
-          console.error("Error acquiring lock:", error);
-        }
-      } else {
-        console.error("RedLock is not initialized.");
-      }
+      lock = await Lock.getLock().acquire([signUpData.lobbyId], 2000);
       const tableData = await findTableForUser(findTableInput, userProfile);
     }
   } catch (error) {

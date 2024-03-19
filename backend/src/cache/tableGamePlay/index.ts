@@ -1,17 +1,18 @@
 import Joi from "joi";
 import { REDIS } from "../../constants";
-import { IDefaultTableGamePlayInterface } from "../../interfaces/tableGamePlay";
+import { IDefaultTableGamePlay } from "../../interfaces/tableGamePlay";
 import redis from "../redisCommon";
 import Logger from "../../logger";
 import profileService from "../../db/";
 
 const getTableGamePlay = async (
   tableId: string
-): Promise<IDefaultTableGamePlayInterface | null> => {
+): Promise<IDefaultTableGamePlay | null> => {
   const key = `${REDIS.TABLE_GAME_PLAY}:${tableId}`;
   try {
-    const tableGamePlay =
-      await redis.getValueFromKey<IDefaultTableGamePlayInterface>(key);
+    const tableGamePlay = await redis.getValueFromKey<IDefaultTableGamePlay>(
+      key
+    );
     if (tableGamePlay)
       Joi.assert(tableGamePlay, profileService.TableGamePlay.joiSchema());
 
@@ -26,4 +27,16 @@ const getTableGamePlay = async (
   }
 };
 
-export default { getTableGamePlay };
+const insertTableGamePlay = async (
+  tableGamePlay: IDefaultTableGamePlay,
+  tableId: string
+) => {
+  const key = `${REDIS.TABLE_GAME_PLAY}:${tableId}`;
+  try {
+    Joi.assert(tableGamePlay, profileService.TableGamePlay.joiSchema());
+    const res = await redis.setValueInKeyWithExpiry(key, tableGamePlay);
+    return res;
+  } catch (error) {}
+};
+
+export default { getTableGamePlay, insertTableGamePlay };
