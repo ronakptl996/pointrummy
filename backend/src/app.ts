@@ -37,7 +37,7 @@ import Lock from "./lock";
     require("./commonEventHandlers/socket");
 
     // Initialize Lock
-    Lock.init(redisClient);
+    Lock.init();
 
     const isLoganable = true;
     global.isLoganable = isLoganable;

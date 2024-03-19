@@ -6,7 +6,7 @@ import { signUpFormator } from "../InputDataFormator";
 import { ISignUpInput } from "../interfaces/signup";
 import { INewGTIResponse } from "../interfaces/tableConfig";
 import { tableGamePlayCache } from "../cache";
-import { createOrFindUser } from "../services/userPlayTable";
+import { createOrFindUser, findTableForUser } from "../services/userPlayTable";
 import { checkBalance, verifyUserProfile } from "../clientsideAPI";
 import config from "../config";
 import commonEventEmitter from "../commonEventEmitter";
@@ -190,7 +190,44 @@ async function signUpHandler(
         throw new Error("Unable to check Balance data");
       }
     }
-  } catch (error) {}
+
+    if (freshSignUp) {
+      const findTableInput = {
+        ...userSignUp.signUpData,
+        ...{
+          entryFee: Number(Number(signUpData.entryFee) / NUMERICAL.EIGHTY),
+          noOfPlayer: signUpData.noOfPlayer,
+          minPlayer: signUpData.minPlayer,
+          moneyMode: signUpData.moneyMode,
+          latitude: userProfile.latitude,
+          longitude: userProfile.longitude,
+          authToken: userProfile.authToken,
+          isUseBot: signUpData.isUseBot,
+        },
+      };
+
+      console.log("findTableInput >>", findTableInput);
+      console.log("userProfile >>", userProfile);
+
+      // lock = await Lock.getLock().acquire([signUpData.lobbyId], 2000);
+      const redLock = Lock.getLock(); // Retrieve the RedLock instance
+      console.log("REDLOCK >>>>", redLock);
+
+      if (redLock) {
+        try {
+          lock = await redLock.acquire([signUpData.lobbyId], 2000);
+          console.log("Lock acquired successfully.");
+        } catch (error) {
+          console.error("Error acquiring lock:", error);
+        }
+      } else {
+        console.error("RedLock is not initialized.");
+      }
+      const tableData = await findTableForUser(findTableInput, userProfile);
+    }
+  } catch (error) {
+    Logger.error("<<======= signUpHandler() Error ======>>", error);
+  }
 }
 
 export default signUpHandler;

@@ -45,3 +45,21 @@ export interface IFindUser {
   latitude: string;
   longitude: string;
 }
+
+export interface ICreateTable {
+  socketId: string;
+  userId: string;
+  username: string;
+  profilePic: string;
+  entryFee: number;
+  gameId: string;
+  lobbyId: string;
+  noOfPlayer: number;
+  minPlayer: number;
+  moneyMode: string;
+  gameType: string;
+  latitude: string;
+  longitude: string;
+  authToken: string;
+  isUseBot: boolean;
+}
