@@ -1,10 +1,20 @@
 import Logger from "../../logger";
 import { EMPTY, NUMERICAL } from "../../constants";
 import { ICreateTable } from "../../interfaces/signup";
-import { tableGamePlayCache, userProfileCache } from "../../cache";
+import { IBlockUserCheck } from "../../interfaces/common";
+import { ITableQueue } from "../../interfaces/tableConfig";
 import getAvailableTable from "./getAvailableTable";
 import createTable from "./createTable";
 import { setUpFirstRound } from "../round";
+import blockUserCheck from "../blockUserCheck";
+import {
+  tableConfigCache,
+  tableGamePlayCache,
+  userProfileCache,
+} from "../../cache";
+import redis from "../../cache/redisCommon";
+import { rediusCheck } from "../../clientsideAPI";
+import { locationDistanceCheck } from "../locationCheck";
 
 const findOrCreateTable = async (signUpData: ICreateTable): Promise<string> => {
   const userId = signUpData.userId;
@@ -71,10 +81,117 @@ const findOrCreateTable = async (signUpData: ICreateTable): Promise<string> => {
       Logger.info(userId, " createTable : tableId :: ", tableId);
 
       await setUpFirstRound({ tableId, gameType: signUpData.gameType });
-    }
-  } catch (error) {}
+    } else {
+      // Blocking User Check
+      let blockUserData: IBlockUserCheck | null = await blockUserCheck(
+        tableId,
+        signUpData,
+        key
+      );
 
-  return "";
+      if (!blockUserData) throw new Error(`Could not block user`);
+
+      Logger.info(`blockUserData :: >>`, blockUserData);
+      tableId = blockUserData.tableId;
+
+      // Push key into redis
+      let blockUserKey = `blockUserCheck:${signUpData.lobbyId}`;
+      let blockUserArr: any = await redis.getValueFromKey(blockUserKey);
+      Logger.info("Block User : getBlockUserArr", blockUserArr);
+
+      if (blockUserArr && blockUserArr.tableId.length > NUMERICAL.ZERO) {
+        for (let i = 0; i < blockUserArr.tableId.length; i++) {
+          let key = `${signUpData.lobbyId}`;
+          let getTableQueueArr: ITableQueue =
+            await tableConfigCache.getTableFromQueue(key);
+
+          let arrayData =
+            getTableQueueArr && getTableQueueArr.tableId
+              ? getTableQueueArr.tableId
+              : [];
+
+          arrayData.push(blockUserArr.tableId[i]);
+
+          await tableConfigCache.setTableFromQueue(key, { tableId: arrayData });
+        }
+        await redis.deleteKey(blockUserKey);
+      }
+
+      Logger.info(" blockUserCheck ==>> after", tableId);
+
+      // Location Check or radius check
+      if (!blockUserData.isNewTableCreated) {
+        const rediusCheckData = await rediusCheck(
+          signUpData.gameId,
+          signUpData.authToken,
+          userProfile.socketId,
+          tableId
+        );
+
+        Logger.info("userData.isUseBot  ==>>>", signUpData.isUseBot);
+
+        if (rediusCheckData) {
+          let rangeRediusCheck: number = parseFloat(
+            rediusCheckData.LocationRange
+          );
+          if (
+            rediusCheckData &&
+            rediusCheckData.isGameRadiusLocationOn &&
+            rediusCheckData != NUMERICAL.ZERO &&
+            signUpData.isUseBot == false
+          ) {
+            Logger.info("locationDistanceCheck=====>>before", tableId);
+
+            tableId = await locationDistanceCheck(
+              tableId,
+              signUpData,
+              key,
+              rangeRediusCheck
+            );
+
+            // push key into redis
+            let locationKey = `LocationCheck:${signUpData.lobbyId}`;
+            let getLocationArr: any = await redis.getValueFromKey(locationKey);
+
+            if (
+              getLocationArr &&
+              getLocationArr.tableId.length > NUMERICAL.ZERO
+            ) {
+              for (let i = 0; i < getLocationArr.tableId.length; i++) {
+                let key = `${signUpData.lobbyId}`;
+                let getTableQueueArr: ITableQueue =
+                  await tableConfigCache.getTableFromQueue(key);
+                let arrayData =
+                  getTableQueueArr && getTableQueueArr.tableId
+                    ? getTableQueueArr.tableId
+                    : [];
+                arrayData.push(getLocationArr.tableId[i]);
+                await tableConfigCache.setTableFromQueue(key, {
+                  tableId: arrayData,
+                });
+              }
+              await redis.deleteKey(locationKey);
+            }
+            Logger.info("locationDistanceCheck=====>>after", tableId);
+          }
+        }
+      }
+    }
+
+    Logger.info(
+      userId,
+      `Ending findOrCreateTable for userId : ${signUpData.userId} and tableId : ${tableId}`
+    );
+
+    return tableId;
+  } catch (error: any) {
+    Logger.error(userId, `Error in findOrCreateTable`, error);
+    throw new Error(
+      error && error.message && typeof error.message === "string"
+        ? error.message
+        : `Error in findOrCreateTable`
+    );
+  }
 };
 
 export default findOrCreateTable;

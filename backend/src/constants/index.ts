@@ -4,6 +4,7 @@ import TABLE_STATE from "./tableState";
 import REDIS from "./redis";
 import EVENT from "./event";
 import MESSAGES from "./messsages";
+import PLAYER_STATE from "./playerState";
 
 const exportObject = Object.freeze({
   SOCKET,
@@ -14,6 +15,7 @@ const exportObject = Object.freeze({
   EMPTY: "",
   MESSAGES,
   TABLE_STATE,
+  PLAYER_STATE,
 });
 
 export = exportObject;

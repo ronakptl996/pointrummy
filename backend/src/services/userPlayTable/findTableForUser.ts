@@ -7,6 +7,11 @@ const findTableForUser = async (
   userProfile: IUserProfileOutput
 ) => {
   const tableId = await findOrCreateTable(data);
+
+  console.log("TABLE CREATED ID >> ", tableId);
+
+  try {
+  } catch (error) {}
 };
 
 export default findTableForUser;

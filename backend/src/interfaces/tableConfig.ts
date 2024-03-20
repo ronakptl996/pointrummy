@@ -42,3 +42,7 @@ export interface IDefaultTableConfig {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ITableQueue {
+  tableId: Array<string>;
+}

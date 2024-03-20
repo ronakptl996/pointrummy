@@ -37,4 +37,26 @@ const setTableConfig = async (tableId: string, obj: IDefaultTableConfig) => {
   }
 };
 
-export default { getTableFromQueue, setTableFromQueue, setTableConfig };
+const getTableConfig = async (
+  tableId: string
+): Promise<IDefaultTableConfig | null> => {
+  const key = `${REDIS.GAME_TABLE}:${tableId}`;
+  try {
+    const tableConfig = await redis.getValueFromKey<IDefaultTableConfig>(key);
+    if (tableConfig)
+      Joi.assert(tableConfig, profileServices.TableConfig.joiSchema());
+    return tableConfig;
+  } catch (error) {
+    Logger.error(tableId, `Error in getTableConfig for key ${key} `, error);
+    throw new Error(
+      `Error in getTableConfig for key ${key}, ERROR :: ${error}`
+    );
+  }
+};
+
+export default {
+  getTableFromQueue,
+  setTableFromQueue,
+  getTableConfig,
+  setTableConfig,
+};
