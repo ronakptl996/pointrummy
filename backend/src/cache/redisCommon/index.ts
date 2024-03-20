@@ -29,7 +29,10 @@ const getValueFromKey = async <T>(key: string): Promise<T | null> => {
 
 const deleteKey = async (key: string) => global.redisClient.del(key);
 
-const setValueInKeyWithExpiry = async (key: string, obj: any) => {
+const setValueInKeyWithExpiry = async (
+  key: string,
+  obj: any
+): Promise<boolean> => {
   const exp: number = 2 * 60 * 60;
 
   return new Promise(function (resolve, reject) {

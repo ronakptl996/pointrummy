@@ -5,7 +5,7 @@ import { EMPTY, EVENT, MESSAGES, NUMERICAL } from "../constants";
 import { signUpFormator } from "../InputDataFormator";
 import { ISignUpInput } from "../interfaces/signup";
 import { INewGTIResponse } from "../interfaces/tableConfig";
-import { tableGamePlayCache } from "../cache";
+import { tableGamePlayCache, userProfileCache } from "../cache";
 import { createOrFindUser, findTableForUser } from "../services/userPlayTable";
 import { checkBalance, verifyUserProfile } from "../clientsideAPI";
 import config from "../config";
@@ -210,7 +210,16 @@ async function signUpHandler(
       console.log("userProfile >>", userProfile);
 
       lock = await Lock.getLock().acquire([signUpData.lobbyId], 2000);
-      const tableData = await findTableForUser(findTableInput, userProfile);
+      const { tableConfig, tableGamePlay, playerGamePlay } =
+        await findTableForUser(findTableInput, userProfile);
+
+      userProfile.tableId = tableConfig._id;
+      userProfile.tableIds.push(tableConfig._id);
+
+      Logger.info(userId, "userProfile.tableIds ::>>", userProfile.tableIds);
+
+      socket.tableId = userProfile.tableId;
+      await userProfileCache.setUserProfile(userId, userProfile);
     }
   } catch (error) {
     Logger.error("<<======= signUpHandler() Error ======>>", error);

@@ -1,7 +1,7 @@
 import config from "../config";
 import { ObjectId } from "mongodb";
 import { GetRandomInt } from "../common";
-import { EMPTY, NUMERICAL, TABLE_STATE } from "../constants";
+import { EMPTY, NUMERICAL, PLAYER_STATE, TABLE_STATE } from "../constants";
 import {
   IUserProfileDataInput,
   IUserProfileOutput,
@@ -9,6 +9,7 @@ import {
 import { ICreateTable } from "../interfaces/signup";
 import { IDefaultTableConfig } from "../interfaces/tableConfig";
 import { IDefaultTableGamePlay } from "../interfaces/tableGamePlay";
+import { IDefaultPlayerGamePlay } from "../interfaces/playerGamePlay";
 
 const { GAME_START_TIMER, USER_TURN_TIMER, SECONDARY_TIMER, DECLARE_TIMER } =
   config.getConfig();
@@ -106,4 +107,48 @@ const defaultTableGamePlayData = (gameType: string): IDefaultTableGamePlay => {
   };
 };
 
-export { defaultUserProfile, defaultTableData, defaultTableGamePlayData };
+const defaultPlayerGamePlayData = (
+  userId: string,
+  seatIndex: number,
+  username: string,
+  profilePic: string,
+  userStatus: string
+): IDefaultPlayerGamePlay => {
+  const currentTimeStamp = new Date();
+  return {
+    _id: new ObjectId().toString(),
+    userId,
+    username,
+    profilePic,
+    seatIndex,
+    userStatus: userStatus ? userStatus : PLAYER_STATE.WATCHING,
+    playingStatus: EMPTY,
+    tCount: NUMERICAL.ZERO,
+    cardPoints: NUMERICAL.ZERO,
+    lastPickCard: EMPTY,
+    pickFromDeck: EMPTY,
+    currentCards: [],
+    groupingCards: {
+      pure: [],
+      impure: [],
+      set: [],
+      dwd: [],
+    },
+    turnTimeOut: NUMERICAL.ZERO,
+    seconderyTimerCounts: NUMERICAL.ZERO,
+    winningCash: NUMERICAL.ZERO,
+    looseingCash: NUMERICAL.ZERO,
+    isDropAndMove: false,
+    dropScore: NUMERICAL.MINUS_ONE,
+    createdAt: currentTimeStamp.toString(),
+    updatedAt: currentTimeStamp.toString(),
+    ispickCard: false,
+  };
+};
+
+export {
+  defaultUserProfile,
+  defaultTableData,
+  defaultTableGamePlayData,
+  defaultPlayerGamePlayData,
+};
