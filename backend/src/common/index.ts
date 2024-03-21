@@ -7,4 +7,10 @@ const GetRandomInt = (min: number, max: number) => {
   return Number(rnd);
 };
 
-export { GetRandomInt };
+const diffSeconds = (date1: Date, date2: Date): number => {
+  const diff = (new Date(date1).getTime() - new Date(date2).getTime()) / 1000;
+
+  return Math.ceil(diff);
+};
+
+export { GetRandomInt, diffSeconds };

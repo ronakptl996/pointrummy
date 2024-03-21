@@ -63,3 +63,22 @@ export interface ICreateTable {
   authToken: string;
   isUseBot: boolean;
 }
+
+export interface ISignupResponse {
+  _id: string;
+  un: string;
+  pp: string;
+  // isRejoin: boolean;
+  socketid: string;
+  tableId: string;
+  gameId: string;
+  lobbyId: string;
+  chips: string;
+  isPlay?: boolean;
+  isRobot: boolean;
+  latitude: string;
+  longitude: string;
+  entryFee: string;
+  maximumSeat: number;
+  maxTableCreateLimit: number;
+}

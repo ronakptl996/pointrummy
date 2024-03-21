@@ -5,6 +5,7 @@ import REDIS from "./redis";
 import EVENT from "./event";
 import MESSAGES from "./messsages";
 import PLAYER_STATE from "./playerState";
+import CARDS_STATUS from "./cardsStatus";
 
 const exportObject = Object.freeze({
   SOCKET,
@@ -16,6 +17,7 @@ const exportObject = Object.freeze({
   MESSAGES,
   TABLE_STATE,
   PLAYER_STATE,
+  CARDS_STATUS,
 });
 
 export = exportObject;

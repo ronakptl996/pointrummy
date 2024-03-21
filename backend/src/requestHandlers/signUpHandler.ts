@@ -7,9 +7,12 @@ import { ISignUpInput } from "../interfaces/signup";
 import { INewGTIResponse } from "../interfaces/tableConfig";
 import { tableGamePlayCache, userProfileCache } from "../cache";
 import { createOrFindUser, findTableForUser } from "../services/userPlayTable";
+import formatingSignUpResData from "../services/signUp/formatingSignUpResData";
 import { checkBalance, verifyUserProfile } from "../clientsideAPI";
 import config from "../config";
 import commonEventEmitter from "../commonEventEmitter";
+import { formatSignUpData } from "../formatResponseData";
+import { ackEvent } from "../utils";
 
 const { MAXIMUM_TABLE_CREATE_LIMIT } = config.getConfig();
 
@@ -89,6 +92,7 @@ async function signUpHandler(
     });
 
     if (!userSignUp) throw new Errors.UnknownError("USER_SIGNUP_FAILED");
+
     const userProfile = userSignUp.userProfile;
     Logger.info(userId, "userProfile :: >> ", userProfile);
 
@@ -220,9 +224,38 @@ async function signUpHandler(
 
       socket.tableId = userProfile.tableId;
       await userProfileCache.setUserProfile(userId, userProfile);
+
+      const { currentGameTableInfoData, gameTableInfoData } =
+        await formatingSignUpResData(userId);
+
+      const formatedSignUpResponse = await formatSignUpData(userProfile);
+
+      // fresh Signup acknowledged
+      ackEvent(
+        EVENT.SIGN_UP_SOCKET_EVENT,
+        {
+          signupResponse: formatedSignUpResponse,
+          gameTableInfoData: gameTableInfoData,
+          reconnect: false,
+        },
+        socket.userId,
+        tableId,
+        ack
+      );
+      return currentGameTableInfoData[NUMERICAL.ZERO];
+    } else {
+      throw new Errors.UnknownError("NOT_FRESH_SIGNUP");
     }
   } catch (error) {
     Logger.error("<<======= signUpHandler() Error ======>>", error);
+
+    // (IMPLEMENT) ERROR Handling
+  } finally {
+    try {
+      if (lock) await Lock.getLock().release(lock);
+    } catch (error) {
+      Logger.error(error, " signUpHandler ");
+    }
   }
 }
 
