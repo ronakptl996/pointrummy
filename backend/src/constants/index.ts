@@ -7,6 +7,7 @@ import MESSAGES from "./messsages";
 import PLAYER_STATE from "./playerState";
 import CARDS_STATUS from "./cardsStatus";
 import EVENT_EMITTER from "./eventEmitter";
+import SHUFFLE_CARDS from "./shuffleCards";
 
 const exportObject = Object.freeze({
   SOCKET,
@@ -20,6 +21,7 @@ const exportObject = Object.freeze({
   PLAYER_STATE,
   EVENT_EMITTER,
   CARDS_STATUS,
+  SHUFFLE_CARDS,
 });
 
 export = exportObject;

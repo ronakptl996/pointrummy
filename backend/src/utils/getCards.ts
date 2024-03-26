@@ -1,0 +1,46 @@
+import Logger from "../logger";
+import { tableConfigCache, tableGamePlayCache } from "../cache";
+import { setDistributedCard } from "../services/shuffleCards";
+
+const getCards = async (
+  tableId: string,
+  currentRound: number,
+  totalActivePlayer: number
+) => {
+  try {
+    Logger.info(
+      tableId,
+      `Starting getCards for tableId : ${tableId} and round : ${currentRound}`
+    );
+
+    const [tableConfig, tableGamePlay] = await Promise.all([
+      tableConfigCache.getTableConfig(tableId),
+      tableGamePlayCache.getTableGamePlay(tableId),
+    ]);
+    if (!tableGamePlay || !tableConfig) throw Error("Unable to get data");
+
+    let userCards = setDistributedCard(
+      tableConfig.noOfPlayer,
+      totalActivePlayer,
+      tableId
+    );
+
+    Logger.info(
+      tableId,
+      `Ending getCards for tableId : ${tableId} and round : ${currentRound}`,
+      "userCards ::  >>",
+      userCards
+    );
+    return userCards;
+  } catch (error) {
+    Logger.error(
+      tableId,
+      error,
+      ` table ${tableId} round ${currentRound} function getCards `
+    );
+    Logger.info(tableId, " INTERNAL_ERROR_getCards()=== error ==", error);
+    throw new Error(` INTERNAL_ERROR_getCards() =====>> ${error}`);
+  }
+};
+
+export default getCards;

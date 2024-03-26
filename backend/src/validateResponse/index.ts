@@ -1,8 +1,10 @@
 import Joi from "joi";
 import Logger from "../logger";
 import { INewGTIResponse, JTResponse } from "../interfaces/tableConfig";
+import { ICountDown } from "../interfaces/round";
 import gtiResponseValidator from "../validators/responseValidator/gtiResponse";
 import joinTableResponseValidator from "../validators/responseValidator/joinTableResponse";
+import countDownResponseValidator from "../validators/responseValidator/countDownResponse";
 
 const gtiResponseFormator = async (
   gtiResponse: INewGTIResponse
@@ -28,4 +30,21 @@ const joinTableResponseFormator = async (joinTableResponse: JTResponse) => {
   }
 };
 
-export { gtiResponseFormator, joinTableResponseFormator };
+const countDownResponseFormator = async (
+  countDownData: ICountDown
+): Promise<ICountDown> => {
+  const tableId = countDownData.tableId;
+  try {
+    Joi.assert(countDownData, countDownResponseValidator());
+    return countDownData;
+  } catch (error) {
+    Logger.error(tableId, error, "-", countDownData);
+    throw new Error(`countDownResponseFormator() Erorr::${error}`);
+  }
+};
+
+export {
+  gtiResponseFormator,
+  joinTableResponseFormator,
+  countDownResponseFormator,
+};

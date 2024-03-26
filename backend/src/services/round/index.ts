@@ -1,3 +1,4 @@
+import roundStartTimer from "./roundStartTimer";
 import setUpFirstRound from "./setUpRound";
 
-export { setUpFirstRound };
+export { roundStartTimer, setUpFirstRound };

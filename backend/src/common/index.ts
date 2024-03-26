@@ -13,4 +13,15 @@ const diffSeconds = (date1: Date, date2: Date): number => {
   return Math.ceil(diff);
 };
 
-export { GetRandomInt, diffSeconds };
+const shuffleCards = (Cards: string[]) => {
+  const cards = _.clone(Cards);
+  const shuffle = [];
+  while (cards.length > 0) {
+    const rt = Math.floor(Math.random() * cards.length);
+    shuffle.push(cards[rt]);
+    cards.splice(rt, 1);
+  }
+  return shuffle;
+};
+
+export { GetRandomInt, diffSeconds, shuffleCards };

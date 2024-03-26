@@ -1,33 +1,37 @@
 import config from "../../config";
 import Logger from "../../logger";
+import Errors from "../../errors";
+import { IErrorRes } from "../../interfaces/signup";
+import { INewGTIResponse, IRejoinResponse } from "../../interfaces/tableConfig";
+import { findUserFromSeatIndex } from "../../utils";
 import {
   playerGamePlayCache,
   tableConfigCache,
   tableGamePlayCache,
   userProfileCache,
 } from "../../cache";
-import { IErrorRes } from "../../interfaces/signup";
-import { INewGTIResponse, IRejoinResponse } from "../../interfaces/tableConfig";
-import { findUserFromSeatIndex } from "../../utils";
 import {
   getOnlinePlayerCountLobbyWise,
   incrCounterLobbyWise,
   setCounterInitialValueLobby,
 } from "../../cache/onlinePlayer";
 import {
+  EMPTY,
   EVENT,
+  MESSAGES,
   NUMERICAL,
   PLAYER_STATE,
   REDIS,
   TABLE_STATE,
 } from "../../constants";
-import { emitJoinTableEvent } from "../emitEvents";
-import findTotalPlayersCount from "../userPlayTable/findTotalPlayers";
-import { addGameRunningStatus } from "../../clientsideAPI";
-import { IDefaultPlayerGamePlay } from "../../interfaces/playerGamePlay";
 import commonEventEmitter from "../../commonEventEmitter";
+import findTotalPlayersCount from "../userPlayTable/findTotalPlayers";
+import { IDefaultPlayerGamePlay } from "../../interfaces/playerGamePlay";
+import { emitJoinTableEvent } from "../emitEvents";
+import { addGameRunningStatus } from "../../clientsideAPI";
 import waitingForPlayerTimerStart from "../../scheduler/queues/waitingForPlayerTimerStart.queue";
 import cancelWaitingForPlayerTimer from "../../scheduler/cancelJob/waitingForPlayerTimer.cancel";
+import { roundStartTimer } from "../round";
 
 const { WAIT_FOR_OTHER_PLAYER_TIMER } = config.getConfig();
 
@@ -213,13 +217,65 @@ const joinTable = async (
               if (
                 tableGamePlay.tableState === TABLE_STATE.WAIT_FOR_OTHER_PLAYERS
               ) {
+                await roundStartTimer(tableId, tableConfig.currentRound);
               }
             }
+          } else {
+            if (totalPlayersCount === tableConfig.minPlayer) {
+              await roundStartTimer(tableId, tableConfig.currentRound);
+            }
           }
+        } else if (PGP?.userStatus == PLAYER_STATE.WATCHING) {
+          let nonProdMsg = "user in watching mode";
+          commonEventEmitter.emit(EVENT.SHOW_POPUP_CLIENT_SOCKET_EVENT, {
+            socket: socketId,
+            data: {
+              isPopup: true,
+              popupType: MESSAGES.ALERT_MESSAGE.TYPE.BOTTOM_TOAST_POPUP,
+              title: nonProdMsg,
+              message:
+                MESSAGES.ERROR
+                  .YOU_ARE_SEAT_IN_WATCHING_MODE_PLEASE_WAITING_FOR_NEW_GAME_START,
+              showTimer: false,
+              tableId,
+            },
+          });
+        } else {
+          throw new Errors.UnknownError("some error at discardCard");
         }
       }
     }
-  } catch (error) {}
+    return { success: true, error: null };
+  } catch (error) {
+    Logger.error(
+      error,
+      ` table ${
+        response && "tableId" in response ? response["tableId"] : ""
+      }  user ${tempUserId} function  joinTable`
+    );
+
+    if (error instanceof Errors.UnknownError) {
+      let nonProdMsg = "Join Table Failed";
+      let msg = MESSAGES.ERROR.COMMON_ERROR;
+
+      commonEventEmitter.emit(EVENT.SHOW_POPUP_CLIENT_SOCKET_EVENT, {
+        socket: socketId,
+        data: {
+          isPopup: true,
+          popupType: MESSAGES.ALERT_MESSAGE.TYPE.COMMON_POPUP,
+          title: nonProdMsg,
+          message: msg,
+          tableId: EMPTY,
+          buttonCounts: NUMERICAL.ONE,
+          button_text: [MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.EXIT],
+          button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED],
+          button_methods: [MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.EXIT],
+        },
+      });
+    }
+
+    throw new Error(`function  joinTable error ${error}`);
+  }
 };
 
 export default joinTable;
