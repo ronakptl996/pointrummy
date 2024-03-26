@@ -26,6 +26,8 @@ import findTotalPlayersCount from "../userPlayTable/findTotalPlayers";
 import { addGameRunningStatus } from "../../clientsideAPI";
 import { IDefaultPlayerGamePlay } from "../../interfaces/playerGamePlay";
 import commonEventEmitter from "../../commonEventEmitter";
+import waitingForPlayerTimerStart from "../../scheduler/queues/waitingForPlayerTimerStart.queue";
+import cancelWaitingForPlayerTimer from "../../scheduler/cancelJob/waitingForPlayerTimer.cancel";
 
 const { WAIT_FOR_OTHER_PLAYER_TIMER } = config.getConfig();
 
@@ -196,7 +198,22 @@ const joinTable = async (
                 WAIT_FOR_OTHER_PLAYER_TIMER
               );
 
-              
+              await waitingForPlayerTimerStart({
+                timer:
+                  Number(WAIT_FOR_OTHER_PLAYER_TIMER) + NUMERICAL.FIVE_HUNDRED,
+                jobId: `waitingForPlayerTimer:${tableId}`,
+                tableId,
+                currentRound: tableConfig.currentRound,
+              });
+            } else if (tableConfig.noOfPlayer === totalPlayersCount) {
+              await cancelWaitingForPlayerTimer(
+                `waitingForPlayerTimer:${tableId}`,
+                tableId
+              );
+              if (
+                tableGamePlay.tableState === TABLE_STATE.WAIT_FOR_OTHER_PLAYERS
+              ) {
+              }
             }
           }
         }
