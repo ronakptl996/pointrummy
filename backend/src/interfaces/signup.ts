@@ -82,3 +82,13 @@ export interface ISignupResponse {
   maximumSeat: number;
   maxTableCreateLimit: number;
 }
+
+interface IErrorObj {
+  errorCode: number;
+  errorMessage: string;
+}
+
+export interface IErrorRes {
+  success: boolean;
+  error: IErrorObj | null;
+}

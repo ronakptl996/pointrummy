@@ -16,3 +16,9 @@ export interface IRediusCheckData {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface IAddGameRunningStatus {
+  tableId: string;
+  tournamentId: string;
+  gameId: string;
+}

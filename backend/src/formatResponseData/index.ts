@@ -4,10 +4,14 @@ import manageAndUpdateData from "../utils/manageCardData";
 import { userProfileCache, playerGamePlayCache } from "../cache";
 import { diffSeconds } from "../common";
 import { NUMERICAL, TABLE_STATE } from "../constants";
-import { gtiResponseFormator } from "../validateResponse";
+import {
+  gtiResponseFormator,
+  joinTableResponseFormator,
+} from "../validateResponse";
 import {
   IDefaultTableConfig,
   INewGTIResponse,
+  JTResponse,
 } from "../interfaces/tableConfig";
 import { IDefaultTableGamePlay } from "../interfaces/tableGamePlay";
 import { ISeats, ISignupResponse } from "../interfaces/signup";
@@ -245,8 +249,35 @@ const formateUpdatedGameTableData = async (
   }
 };
 
+const formatJoinTableData = async (
+  seats: ISeats,
+  rejoin: boolean,
+  userState: string
+) => {
+  try {
+    const data: JTResponse = {
+      si: seats.si,
+      userId: seats.userId,
+      name: seats.name,
+      pp: seats.pp,
+      userState,
+    };
+
+    if (rejoin) data.rejoin = rejoin;
+    const validatedJoinTableResponse = await joinTableResponseFormator(data);
+
+    return validatedJoinTableResponse;
+  } catch (error) {
+    Logger.error(`formatJoinTableData for table user ${error}`);
+    throw new Error(
+      `INTERNAL_ERROR_formatJoinTableData() ===>> Error::${error}`
+    );
+  }
+};
+
 export {
   formateRejoinTableData,
   formateUpdatedGameTableData,
   formatSignUpData,
+  formatJoinTableData,
 };

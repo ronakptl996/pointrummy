@@ -33,4 +33,51 @@ async function setPlayerCounterInitialValue(onlinePlayer: string) {
   } catch (error) {}
 }
 
-export { getOnlinePlayerCount, setPlayerCounterInitialValue, incrCounter };
+const getOnlinePlayerCountLobbyWise = async (
+  onlinePlayerLobby: string,
+  lobbId: string
+) => {
+  try {
+    const key = `${REDIS.ONLINE_USER_COUNTER}:${lobbId}:${onlinePlayerLobby}`;
+    console.log(" >> getOnlinePlayerCountLobbyWise >>  ", key);
+
+    return await redis.getValueFromKey(key);
+  } catch (error) {
+    Logger.error("CATCH_ERROR :  getOnliPlayerCountLobbyWise", error);
+    return false;
+  }
+};
+
+const setCounterInitialValueLobby = async (
+  onlinePlayerLobby: string,
+  lobbId: string
+) => {
+  try {
+    let counter = NUMERICAL.ZERO;
+    const key = `${REDIS.ONLINE_USER_COUNTER}:${lobbId}:${onlinePlayerLobby}`;
+    return await redis.setValueInKey(key, counter);
+  } catch (error) {
+    Logger.error("CATCH_ERROR :  setCounterIntialValueLobby", error);
+    return false;
+  }
+};
+
+const incrCounterLobbyWise = (onlinePlayerLobby: string, lobbId: string) => {
+  try {
+    return redis.setIncrementCounter(
+      `${REDIS.ONLINE_USER_COUNTER}:${lobbId}:${onlinePlayerLobby}`
+    );
+  } catch (error) {
+    Logger.error("CATCH_ERROR : incrCounterLobbyWise", error);
+    throw error;
+  }
+};
+
+export {
+  getOnlinePlayerCount,
+  setPlayerCounterInitialValue,
+  incrCounter,
+  getOnlinePlayerCountLobbyWise,
+  setCounterInitialValueLobby,
+  incrCounterLobbyWise,
+};

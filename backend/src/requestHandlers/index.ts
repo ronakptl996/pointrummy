@@ -1,5 +1,6 @@
 import { EVENT } from "../constants";
 import Logger from "../logger";
+import joinTable from "../services/playTable/joinTable";
 import signUpHandler from "./signUpHandler";
 
 async function requestHandler(
@@ -24,6 +25,17 @@ async function requestHandler(
           isRejoinOrNewGame,
           ack
         );
+
+        Logger.info("Before Join Table : response :: ===>>", response);
+
+        if (
+          response &&
+          response &&
+          "tableId" in response &&
+          !response["reconnect"]
+        ) {
+          await joinTable(response, socket, false);
+        }
     }
   } catch (error) {
     Logger.error("requestHandler ERROR :: >> ", error);
