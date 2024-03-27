@@ -140,13 +140,13 @@ const emitJoinTableEvent = async (
     Logger.info(tableId, " formatedJTResponse ::: ", formatedJTResponse);
 
     // Join Room
-    commonEventEmitter.emit(EVENT.ADD_PLAYER_IN_TABLE, {
+    await commonEventEmitter.emit(EVENT.ADD_PLAYER_IN_TABLE, {
       socketId,
       data: { tableId, userId },
     });
 
     // Join Table Emit
-    commonEventEmitter.emit(EVENT.JOIN_TABLE_SOCKET_EVENT, {
+    await commonEventEmitter.emit(EVENT.JOIN_TABLE_SOCKET_EVENT, {
       tableId,
       data: formatedJTResponse,
     });

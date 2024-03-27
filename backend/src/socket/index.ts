@@ -33,4 +33,65 @@ const sendEventToClient = async (
   }
 };
 
-export { sendEventToClient };
+const sendEventToRoom = async (
+  roomId: string,
+  responseData: IResponseData,
+  socketId?: string
+) => {
+  const tableId = roomId;
+
+  try {
+    // let getRoom = global.IO.sockets.adapter.rooms.get(roomId);
+    let getRoom = global.IO.sockets.adapter.rooms.get(roomId);
+    if (getRoom) {
+      // const roomSize = global.IO.sockets.sockets.get(socketId);
+      const roomSize = global.IO.sockets.adapter.rooms.get(roomId).size;
+      Logger.info(tableId, "roomeSize ::===>> ", roomSize);
+    }
+
+    if (typeof socketId == "string") {
+      var socket = await global.IO.sockets.sockets.get(socketId);
+      global.IO.to(socket.tableId).emit(
+        responseData.eventName,
+        JSON.stringify(responseData)
+      );
+    } else {
+      global.IO.to(roomId).emit(
+        responseData.eventName,
+        JSON.stringify(responseData)
+      );
+    }
+  } catch (error) {
+    Logger.error(tableId, error, ` table ${roomId} function sendEventToRoom`);
+  }
+};
+
+const addClientInRoom = async (
+  socketId: any,
+  roomId: string,
+  userId: string
+) => {
+  try {
+    let socket: any;
+
+    if (typeof socketId == "string") {
+      socket = await global.IO.sockets.sockets.get(socketId);
+      socket.eventData = { tableId: roomId, userId };
+      socket.tableId = roomId;
+      socket.join(roomId);
+    } else if (socket !== "string") {
+      socketId.eventData = { tableId: roomId, userId };
+      socket.tableId = roomId;
+      socketId.join(roomId);
+    }
+    return true;
+  } catch (error) {
+    Logger.error(
+      userId,
+      error,
+      ` table ${roomId} user ${userId} function addClientInRoom`
+    );
+  }
+};
+
+export { sendEventToClient, addClientInRoom, sendEventToRoom };

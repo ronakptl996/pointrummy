@@ -1,7 +1,7 @@
 import Logger from "../logger";
 import commonEventEmitter from "../commonEventEmitter";
 import { EMPTY, EVENT } from "../constants";
-import { sendEventToClient } from "../socket";
+import { addClientInRoom, sendEventToClient, sendEventToRoom } from "../socket";
 
 interface IResponseData {
   eventName: string;
@@ -19,13 +19,25 @@ const popUpEventClient = (payload: any) => {
   sendEventToClient(socket, responseData, tableId);
 };
 
-const addPlayerInTable = (payload: any) => {
-    const { socketId, data } = payload;
-    const { tableId, userId } = data;
+const addPlayerInTable = async (payload: any) => {
+  const { socketId, data } = payload;
+  const { tableId, userId } = data;
 
-    
+  await addClientInRoom(socketId, tableId, userId);
+};
+
+const joinTableEvent = (payload: any) => {
+  const { tableId, data } = payload;
+  const responseData: IResponseData = {
+    eventName: EVENT.JOIN_TABLE_SOCKET_EVENT,
+    data,
+  };
+  Logger.debug(tableId, "SEND EVENT TO TABLE :: ", responseData);
+  sendEventToRoom(tableId, responseData);
 };
 
 commonEventEmitter.on(EVENT.SHOW_POPUP_CLIENT_SOCKET_EVENT, popUpEventClient);
 
 commonEventEmitter.on(EVENT.ADD_PLAYER_IN_TABLE, addPlayerInTable);
+
+commonEventEmitter.on(EVENT.JOIN_TABLE_SOCKET_EVENT, joinTableEvent);

@@ -1,4 +1,4 @@
-import http from "http";
+import * as http from "http";
 import path from "path";
 import config from "../config";
 import fs from "graceful-fs";
