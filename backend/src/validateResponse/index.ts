@@ -1,10 +1,11 @@
 import Joi from "joi";
 import Logger from "../logger";
 import { INewGTIResponse, JTResponse } from "../interfaces/tableConfig";
-import { ICountDown } from "../interfaces/round";
+import { ICountDown, ITossCards } from "../interfaces/round";
 import gtiResponseValidator from "../validators/responseValidator/gtiResponse";
 import joinTableResponseValidator from "../validators/responseValidator/joinTableResponse";
 import countDownResponseValidator from "../validators/responseValidator/countDownResponse";
+import tossCardResponseValidator from "../validators/responseValidator/tossCardResponse";
 
 const gtiResponseFormator = async (
   gtiResponse: INewGTIResponse
@@ -43,8 +44,20 @@ const countDownResponseFormator = async (
   }
 };
 
+const tossCardResponseFormator = (tossCardData: ITossCards) => {
+  const tableId = tossCardData.tableId;
+  try {
+    Joi.assert(tossCardData, tossCardResponseValidator());
+    return tossCardData;
+  } catch (error) {
+    Logger.error(tableId, error, "-", tossCardData);
+    throw new Error(` tossCardResponseFormator() ===>> ${error}`);
+  }
+};
+
 export {
   gtiResponseFormator,
   joinTableResponseFormator,
   countDownResponseFormator,
+  tossCardResponseFormator,
 };

@@ -22,3 +22,9 @@ export interface IAddGameRunningStatus {
   tournamentId: string;
   gameId: string;
 }
+
+export interface IRoundStart {
+  tableId: string;
+  currentRound: number;
+  // tableGamePlay: defaultTableGamePlayInterface;
+}

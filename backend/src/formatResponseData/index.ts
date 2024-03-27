@@ -7,6 +7,7 @@ import { NUMERICAL, TABLE_STATE } from "../constants";
 import {
   gtiResponseFormator,
   joinTableResponseFormator,
+  tossCardResponseFormator,
 } from "../validateResponse";
 import {
   IDefaultTableConfig,
@@ -17,6 +18,7 @@ import { IDefaultTableGamePlay } from "../interfaces/tableGamePlay";
 import { ISeats, ISignupResponse } from "../interfaces/signup";
 import { IUserProfileOutput } from "../interfaces/userProfile";
 import { IDefaultPlayerGamePlay } from "../interfaces/playerGamePlay";
+import { ITossCards, ITossWinnerData, ITosscard } from "../interfaces/round";
 
 const { GAME_START_TIMER, LOCK_IN_TIMER, MAXIMUM_TABLE_CREATE_LIMIT } =
   config.getConfig();
@@ -275,9 +277,32 @@ const formatJoinTableData = async (
   }
 };
 
+const formatTossCardData = async (
+  tableId: string,
+  tossCardArr: Array<ITosscard>,
+  tossWinnerData: ITossWinnerData
+) => {
+  try {
+    const data: ITossCards = {
+      tableId,
+      tossCardArr,
+      tossWinnerData,
+    };
+
+    const validatedTossCardResponse: ITossCards =
+      await tossCardResponseFormator(data);
+
+    return validatedTossCardResponse;
+  } catch (error) {
+    Logger.error(tableId, `formatTossCardData for table ${tableId} `, error);
+    throw new Error(`INTERNAL_ERROR_formatTossCardData() ==>> ${error} `);
+  }
+};
+
 export {
   formateRejoinTableData,
   formateUpdatedGameTableData,
   formatSignUpData,
   formatJoinTableData,
+  formatTossCardData,
 };
