@@ -97,7 +97,7 @@ const tossCards = async (tableId: string) => {
 
     Logger.info(tableId, " formatedTossCardData :>> ", formatedTossCardData);
 
-    for await (const seat of tableGamePlay.seats) {
+    for (const seat of tableGamePlay.seats) {
       if (seat.userState === PLAYER_STATE.PLAYING) {
         const userProfile = (await userProfileCache.getUserProfile(
           seat.userId

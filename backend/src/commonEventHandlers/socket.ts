@@ -4,6 +4,7 @@ import { EMPTY, EVENT, EVENT_EMITTER } from "../constants";
 import { addClientInRoom, sendEventToClient, sendEventToRoom } from "../socket";
 import lockTimerStart from "../scheduler/queues/lockTimerStart.queue";
 import { roundTimerExpired } from "../services/round";
+import { tossCardTimer } from "../services/initializeRound";
 
 interface IResponseData {
   eventName: string;
@@ -70,6 +71,26 @@ const roundTimerEnd = async (payload: any) => {
   await lockTimerStart({ timer, jobId, tableId, currentRound });
 };
 
+const tossCardEvent = async (payload: any) => {
+  const { tableId, socket, data } = payload;
+  const responseData: IResponseData = {
+    eventName: EVENT.TOSS_CARD_SOCKET_EVENT,
+    data,
+  };
+  Logger.debug(tableId, "SEND EVENT TO TABLE :: ", responseData);
+  sendEventToClient(socket, responseData, tableId);
+};
+
+const dealerPlayerEvent = (payload: any) => {
+  const { tableId, data } = payload;
+  const responseData: IResponseData = {
+    eventName: EVENT.SET_DEALER_SOCKET_EVENT,
+    data,
+  };
+  Logger.debug(tableId, "SEND EVENT TO TABLE :: ", responseData);
+  sendEventToRoom(tableId, responseData);
+};
+
 commonEventEmitter.on(EVENT.SHOW_POPUP_CLIENT_SOCKET_EVENT, popUpEventClient);
 
 commonEventEmitter.on(EVENT.ADD_PLAYER_IN_TABLE, addPlayerInTable);
@@ -86,3 +107,14 @@ commonEventEmitter.on(
 );
 
 commonEventEmitter.on(EVENT_EMITTER.LOCK_IN_PERIOD_EXPIRED, roundTimerExpired);
+
+commonEventEmitter.on(
+  EVENT_EMITTER.BOOT_COLLECTING_START_TIMER_EXPIRED,
+  tossCardTimer
+);
+
+commonEventEmitter.on(EVENT.TOSS_CARD_SOCKET_EVENT, tossCardEvent);
+
+commonEventEmitter.on(EVENT_EMITTER.TOSS_CARD_EXPIRED);
+
+commonEventEmitter.on(EVENT.SET_DEALER_SOCKET_EVENT, dealerPlayerEvent);

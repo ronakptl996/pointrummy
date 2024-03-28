@@ -7,6 +7,7 @@ import { NUMERICAL, TABLE_STATE } from "../constants";
 import {
   gtiResponseFormator,
   joinTableResponseFormator,
+  setDealerResponseFormator,
   tossCardResponseFormator,
 } from "../validateResponse";
 import {
@@ -18,7 +19,12 @@ import { IDefaultTableGamePlay } from "../interfaces/tableGamePlay";
 import { ISeats, ISignupResponse } from "../interfaces/signup";
 import { IUserProfileOutput } from "../interfaces/userProfile";
 import { IDefaultPlayerGamePlay } from "../interfaces/playerGamePlay";
-import { ITossCards, ITossWinnerData, ITosscard } from "../interfaces/round";
+import {
+  ISetDealer,
+  ITossCards,
+  ITossWinnerData,
+  ITosscard,
+} from "../interfaces/round";
 
 const { GAME_START_TIMER, LOCK_IN_TIMER, MAXIMUM_TABLE_CREATE_LIMIT } =
   config.getConfig();
@@ -299,10 +305,33 @@ const formatTossCardData = async (
   }
 };
 
+const formatSetDealerData = async (
+  tableId: string,
+  dealerSeatIndex: number,
+  currentRound: number
+) => {
+  try {
+    const data: ISetDealer = {
+      DLR: dealerSeatIndex,
+      round: currentRound,
+      tableId,
+    };
+
+    const validatedSetDealerResponse: ISetDealer =
+      await setDealerResponseFormator(data);
+
+    return validatedSetDealerResponse;
+  } catch (error) {
+    Logger.error(tableId, `formatSetDearData for table ${tableId} `, error);
+    throw new Error(`INTERNAL_ERROR_formatSetDearData() ==>> ${error} `);
+  }
+};
+
 export {
   formateRejoinTableData,
   formateUpdatedGameTableData,
   formatSignUpData,
   formatJoinTableData,
   formatTossCardData,
+  formatSetDealerData,
 };

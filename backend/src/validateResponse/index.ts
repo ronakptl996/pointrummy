@@ -1,11 +1,12 @@
 import Joi from "joi";
 import Logger from "../logger";
 import { INewGTIResponse, JTResponse } from "../interfaces/tableConfig";
-import { ICountDown, ITossCards } from "../interfaces/round";
+import { ICountDown, ISetDealer, ITossCards } from "../interfaces/round";
 import gtiResponseValidator from "../validators/responseValidator/gtiResponse";
 import joinTableResponseValidator from "../validators/responseValidator/joinTableResponse";
 import countDownResponseValidator from "../validators/responseValidator/countDownResponse";
 import tossCardResponseValidator from "../validators/responseValidator/tossCardResponse";
+import setDealerResponseValidator from "../validators/responseValidator/setDealerResponse";
 
 const gtiResponseFormator = async (
   gtiResponse: INewGTIResponse
@@ -55,9 +56,23 @@ const tossCardResponseFormator = (tossCardData: ITossCards) => {
   }
 };
 
+const setDealerResponseFormator = async (dealerData: ISetDealer) => {
+  const tableId = dealerData.tableId;
+  try {
+    Joi.assert(dealerData, setDealerResponseValidator());
+    return dealerData;
+  } catch (error) {
+    Logger.error(tableId, error, "-", dealerData);
+    Logger.info(tableId, error, "-", dealerData);
+
+    throw new Error(` setDealerResponseFormator() ===>> ${error}`);
+  }
+};
+
 export {
   gtiResponseFormator,
   joinTableResponseFormator,
   countDownResponseFormator,
   tossCardResponseFormator,
+  setDealerResponseFormator,
 };

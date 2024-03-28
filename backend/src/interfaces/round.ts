@@ -23,3 +23,9 @@ export interface ITossCards {
   tossCardArr: Array<ITosscard>;
   tossWinnerData: ITossWinnerData;
 }
+
+export interface ISetDealer {
+  DLR: number;
+  round: number;
+  tableId: string;
+}
