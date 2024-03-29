@@ -1,15 +1,16 @@
 import Logger from "../logger";
-import { ICards } from "../interfaces/inputOutputDataFormator";
-import { IDefaultPlayerGamePlay } from "../interfaces/playerGamePlay";
 import autoMakeGroup from "./autoMakeGroup";
+import { ICards } from "../interfaces/inputOutputDataFormator";
 import { isImpure, isPure, isSet, sortCard } from "./cardLogic";
 import { CARDS_STATUS, NUMERICAL } from "../constants";
 import { pointCalculate } from "../services/shuffleCards";
+import { IDefaultPlayerGamePlay } from "../interfaces/playerGamePlay";
+import { IManageAndUpdateData } from "../interfaces/round";
 
 const manageAndUpdateData = async (
   currentCard: Array<Array<string>>,
   playerGamePlay: IDefaultPlayerGamePlay
-) => {
+): Promise<IManageAndUpdateData> => {
   const userId = playerGamePlay.userId;
   let cards: Array<ICards> = [];
 

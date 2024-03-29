@@ -1,12 +1,20 @@
 import Joi from "joi";
 import Logger from "../logger";
 import { INewGTIResponse, JTResponse } from "../interfaces/tableConfig";
-import { ICountDown, ISetDealer, ITossCards } from "../interfaces/round";
+import {
+  ICountDown,
+  IFormateProvidedCards,
+  ISetDealer,
+  IStartUserTurnResponse,
+  ITossCards,
+} from "../interfaces/round";
 import gtiResponseValidator from "../validators/responseValidator/gtiResponse";
 import joinTableResponseValidator from "../validators/responseValidator/joinTableResponse";
 import countDownResponseValidator from "../validators/responseValidator/countDownResponse";
 import tossCardResponseValidator from "../validators/responseValidator/tossCardResponse";
 import setDealerResponseValidator from "../validators/responseValidator/setDealerResponse";
+import providedCardsValidator from "../validators/responseValidator/providedCardsValidator";
+import userTurnResponseValidator from "../validators/responseValidator/userTurnResponse";
 
 const gtiResponseFormator = async (
   gtiResponse: INewGTIResponse
@@ -69,10 +77,38 @@ const setDealerResponseFormator = async (dealerData: ISetDealer) => {
   }
 };
 
+const providedCardResponseFormator = async (
+  cardData: IFormateProvidedCards
+) => {
+  const tableId = cardData.tableId;
+  try {
+    Joi.assert(cardData, providedCardsValidator());
+    return cardData;
+  } catch (error) {
+    Logger.error(tableId, error, "-", cardData);
+    throw new Error(`providedCardsValidator() ERROR ====>> `);
+  }
+};
+
+const userTurnResponseFormator = async (
+  userTurnData: IStartUserTurnResponse
+) => {
+  const tableId = userTurnData.tableId;
+  try {
+    Joi.assert(userTurnData, userTurnResponseValidator());
+    return userTurnData;
+  } catch (error) {
+    Logger.error(tableId, error, "-", userTurnData);
+    throw new Error(`userTurnResponseFormator() Error :: ${error}`);
+  }
+};
+
 export {
   gtiResponseFormator,
   joinTableResponseFormator,
   countDownResponseFormator,
   tossCardResponseFormator,
   setDealerResponseFormator,
+  providedCardResponseFormator,
+  userTurnResponseFormator,
 };

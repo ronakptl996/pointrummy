@@ -1,4 +1,5 @@
 import Logger from "../../logger";
+import config from "../../config";
 import { EVENT, MESSAGES, NUMERICAL } from "../../constants";
 import { IRoundStart } from "../../interfaces/common";
 import { tableConfigCache, tableGamePlayCache } from "../../cache";
@@ -8,6 +9,10 @@ import dealerSelect from "./dealerSelect";
 import { ISetDealer } from "../../interfaces/round";
 import { formatSetDealerData } from "../../formatResponseData";
 import commonEventEmitter from "../../commonEventEmitter";
+import cardDealing from "../cardDealing";
+import cardDealingStartTimer from "../../scheduler/queues/cardDealing.queue";
+
+const { CARD_DEALING_TIMER } = config.getConfig();
 
 const roundDealerSetTimer = async (gameData: IRoundStart) => {
   let lock: any;
@@ -78,6 +83,25 @@ const roundDealerSetTimer = async (gameData: IRoundStart) => {
     Logger.info(
       tableId,
       `Starting cardDealingTimer for tableId : ${tableId} and round : ${currentRound}`
+    );
+
+    await cardDealing(tableId, currentRound);
+
+    Logger.info(
+      tableId,
+      `Ending cardDealingTimer for tableId : ${tableId} and round : ${currentRound}`
+    );
+
+    await cardDealingStartTimer({
+      timer: Number(CARD_DEALING_TIMER),
+      jobId: `${tableGamePlay.gameType}:cardDealing:${tableId}`,
+      tableId,
+      currentRound,
+    });
+
+    Logger.info(
+      tableId,
+      `Ending cardDealingTimer for tableId : ${tableId} and round : ${currentRound}`
     );
   } catch (error) {}
 };

@@ -7,8 +7,10 @@ import { NUMERICAL, TABLE_STATE } from "../constants";
 import {
   gtiResponseFormator,
   joinTableResponseFormator,
+  providedCardResponseFormator,
   setDealerResponseFormator,
   tossCardResponseFormator,
+  userTurnResponseFormator,
 } from "../validateResponse";
 import {
   IDefaultTableConfig,
@@ -20,11 +22,14 @@ import { ISeats, ISignupResponse } from "../interfaces/signup";
 import { IUserProfileOutput } from "../interfaces/userProfile";
 import { IDefaultPlayerGamePlay } from "../interfaces/playerGamePlay";
 import {
+  IFormateProvidedCards,
   ISetDealer,
+  IStartUserTurnResponse,
   ITossCards,
   ITossWinnerData,
   ITosscard,
 } from "../interfaces/round";
+import { ICards } from "../interfaces/inputOutputDataFormator";
 
 const { GAME_START_TIMER, LOCK_IN_TIMER, MAXIMUM_TABLE_CREATE_LIMIT } =
   config.getConfig();
@@ -327,6 +332,90 @@ const formatSetDealerData = async (
   }
 };
 
+const formatProvidedCards = async (
+  tableId: string,
+  userId: string,
+  closedDeck: Array<string>,
+  opendDeck: Array<string>,
+  trumpCard: Array<string>,
+  cards: Array<ICards>
+) => {
+  try {
+    const providedCardData: IFormateProvidedCards = {
+      cards,
+      opendDeck,
+      trumpCard,
+      closedDeck,
+      cardCount: cards[0].group.length,
+      tableId,
+    };
+
+    const validatedCardResponse: IFormateProvidedCards =
+      await providedCardResponseFormator(providedCardData);
+
+    return validatedCardResponse;
+  } catch (error) {
+    Logger.error(
+      tableId,
+      `formateProvidedCards for table ${tableId} for user ${
+        userId ? userId : ""
+      }`,
+      error
+    );
+    throw new Error(
+      `INTERNAL_ERROR_formateProvidedCards()    Error ==>>> : ${error} `
+    );
+  }
+};
+
+const formatStartUserTurn = async (
+  tableConfig: IDefaultTableConfig,
+  currentTurnUserId: string,
+  currentTurnSI: number,
+  isSeconderyTimer: boolean,
+  isRemainSeconderyTurns: boolean,
+  tableId: string
+): Promise<IStartUserTurnResponse> => {
+  try {
+    let data: IStartUserTurnResponse = {} as IStartUserTurnResponse;
+    if (!isSeconderyTimer) {
+      data = {
+        isSeconderyTimer: isSeconderyTimer,
+        currentTurnUserId,
+        currentTurnSI,
+        isRemainSeconderyTurns,
+        turnTimer: Number(tableConfig.userTurnTimer / NUMERICAL.THOUSAND),
+        tableId,
+      };
+    } else if (isSeconderyTimer) {
+      data = {
+        isSeconderyTimer: isSeconderyTimer,
+        currentTurnUserId,
+        currentTurnSI,
+        isRemainSeconderyTurns,
+        // totalUserTurnTimer: timer,
+        turnTimer: Number(tableConfig.secondaryTimer / NUMERICAL.THOUSAND),
+        tableId,
+      };
+    }
+
+    const validatedUserTurnResponse: IStartUserTurnResponse =
+      await userTurnResponseFormator(data);
+
+    return validatedUserTurnResponse;
+  } catch (error) {
+    Logger.error(
+      tableId,
+      `formatStartUserTurn for table ${tableConfig._id} for user ${
+        currentTurnUserId ? currentTurnUserId : ""
+      }`,
+      error
+    );
+    Logger.info(tableId, "formatStartUserTurn() ERROR :::", error);
+    throw new Error(`formatStartUserTurn() ERROR ::: ${error}`);
+  }
+};
+
 export {
   formateRejoinTableData,
   formateUpdatedGameTableData,
@@ -334,4 +423,6 @@ export {
   formatJoinTableData,
   formatTossCardData,
   formatSetDealerData,
+  formatProvidedCards,
+  formatStartUserTurn,
 };

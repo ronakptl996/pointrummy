@@ -91,6 +91,26 @@ const dealerPlayerEvent = (payload: any) => {
   sendEventToRoom(tableId, responseData);
 };
 
+const provideCardEvent = (payload: any) => {
+  const { socket, data, tableId } = payload;
+  const responseData: IResponseData = {
+    eventName: EVENT.PROVIDED_CARDS_EVENT,
+    data,
+  };
+  Logger.debug(tableId, "SEND EVENT TO CLIENT :: ", responseData);
+  sendEventToClient(socket, responseData, tableId);
+};
+
+const startUserTurnSocket = (payload: any) => {
+  const { tableId, data } = payload;
+  const responseData: IResponseData = {
+    eventName: EVENT.USER_TURN_STARTED_SOCKET_EVENT,
+    data,
+  };
+  Logger.debug(tableId, "SEND EVENT TO TABLE :: ", responseData);
+  sendEventToRoom(tableId, responseData);
+};
+
 commonEventEmitter.on(EVENT.SHOW_POPUP_CLIENT_SOCKET_EVENT, popUpEventClient);
 
 commonEventEmitter.on(EVENT.ADD_PLAYER_IN_TABLE, addPlayerInTable);
@@ -118,3 +138,12 @@ commonEventEmitter.on(EVENT.TOSS_CARD_SOCKET_EVENT, tossCardEvent);
 commonEventEmitter.on(EVENT_EMITTER.TOSS_CARD_EXPIRED);
 
 commonEventEmitter.on(EVENT.SET_DEALER_SOCKET_EVENT, dealerPlayerEvent);
+
+commonEventEmitter.on(EVENT.PROVIDED_CARDS_EVENT, provideCardEvent);
+
+commonEventEmitter.on(EVENT_EMITTER.CARD_DEALING_TIMER_EXPIRED);
+
+commonEventEmitter.on(
+  EVENT.USER_TURN_STARTED_SOCKET_EVENT,
+  startUserTurnSocket
+);
