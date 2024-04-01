@@ -65,6 +65,7 @@ const connectionCallback = async () => {
       if (counter == 2) {
         connectionsMap = { client, pubClient, subClient };
         global.redisClient = client;
+        client.flushDb();
         resolve(connectionsMap);
       }
     }

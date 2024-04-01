@@ -4,7 +4,11 @@ import { EMPTY, EVENT, EVENT_EMITTER } from "../constants";
 import { addClientInRoom, sendEventToClient, sendEventToRoom } from "../socket";
 import lockTimerStart from "../scheduler/queues/lockTimerStart.queue";
 import { roundTimerExpired } from "../services/round";
-import { tossCardTimer } from "../services/initializeRound";
+import {
+  cardDealingTimer,
+  roundDealerSetTimer,
+  tossCardTimer,
+} from "../services/initializeRound";
 
 interface IResponseData {
   eventName: string;
@@ -135,13 +139,16 @@ commonEventEmitter.on(
 
 commonEventEmitter.on(EVENT.TOSS_CARD_SOCKET_EVENT, tossCardEvent);
 
-commonEventEmitter.on(EVENT_EMITTER.TOSS_CARD_EXPIRED);
+commonEventEmitter.on(EVENT_EMITTER.TOSS_CARD_EXPIRED, roundDealerSetTimer);
 
 commonEventEmitter.on(EVENT.SET_DEALER_SOCKET_EVENT, dealerPlayerEvent);
 
 commonEventEmitter.on(EVENT.PROVIDED_CARDS_EVENT, provideCardEvent);
 
-commonEventEmitter.on(EVENT_EMITTER.CARD_DEALING_TIMER_EXPIRED);
+commonEventEmitter.on(
+  EVENT_EMITTER.CARD_DEALING_TIMER_EXPIRED,
+  cardDealingTimer
+);
 
 commonEventEmitter.on(
   EVENT.USER_TURN_STARTED_SOCKET_EVENT,

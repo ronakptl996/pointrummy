@@ -9,6 +9,7 @@ import { formatStartUserTurn } from "../../formatResponseData";
 import { IStartUserTurnResponse } from "../../interfaces/round";
 import { IDefaultTableGamePlay } from "../../interfaces/tableGamePlay";
 import Logger from "../../logger";
+import { addTurnHistory } from "../turnHistory";
 
 const startUserTurn = async (
   tableId: string,
@@ -93,5 +94,12 @@ const startUserTurn = async (
     });
 
     // Add Turn Details in History
-  } catch (error) {}
+    await addTurnHistory(tableId, currentRound, tableGamePlay, playerGamePlay);
+  } catch (error) {
+    Logger.info(tableId, error);
+    Logger.error(tableId, error, ` table ${tableId} function startUserTurn `);
+    throw new Error(`startUserTurn() Error : ===>> ${error}`);
+  }
 };
+
+export default startUserTurn;

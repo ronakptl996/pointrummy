@@ -1,9 +1,17 @@
 import Logger from "../../logger";
 import Errors from "../../errors";
-import { EVENT, PLAYER_STATE, TABLE_STATE } from "../../constants";
+import {
+  EVENT,
+  MESSAGES,
+  NUMERICAL,
+  PLAYER_STATE,
+  TABLE_STATE,
+} from "../../constants";
 import { IRoundStart } from "../../interfaces/common";
 import { tableConfigCache, tableGamePlayCache } from "../../cache";
 import getAllPlayingUser from "../common/getAllPlayingUser";
+import { startUserTurn } from "../turn";
+import commonEventEmitter from "../../commonEventEmitter";
 
 const cardDealingTimer = async (cardDealData: IRoundStart) => {
   let { tableId } = cardDealData;
@@ -96,6 +104,38 @@ const cardDealingTimer = async (cardDealData: IRoundStart) => {
       if (!userData) {
         throw Error("Unable to get data at userData");
       }
+
+      startUserTurn(tableId, userData?.userId, userData?.si, tableGamePlay);
     }
-  } catch (error) {}
+
+    return false;
+  } catch (error) {
+    Logger.error(tableId, "cardDealingTimer error", error);
+
+    let msg = MESSAGES.ERROR.COMMON_ERROR;
+    let nonProdMsg = "";
+    let errorCode = 500;
+
+    if (error instanceof Errors.InvalidInput) {
+      nonProdMsg = "Invalid Input";
+      commonEventEmitter.emit(EVENT.SHOW_POPUP_ROOM_SOCKET_EVENT, {
+        tableId: tableId,
+        data: {
+          isPopup: true,
+          popupType: MESSAGES.ALERT_MESSAGE.TYPE.COMMON_POPUP,
+          title: nonProdMsg,
+          message: msg,
+          tableId,
+          buttonCounts: NUMERICAL.ONE,
+          button_text: [MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.EXIT],
+          button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED],
+          button_methods: [MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.EXIT],
+        },
+      });
+    }
+
+    throw new Error("cardDealingTimer error");
+  }
 };
+
+export default cardDealingTimer;

@@ -103,5 +103,41 @@ const roundDealerSetTimer = async (gameData: IRoundStart) => {
       tableId,
       `Ending cardDealingTimer for tableId : ${tableId} and round : ${currentRound}`
     );
-  } catch (error) {}
+
+    return false;
+  } catch (error) {
+    Logger.error(
+      tableId,
+      error,
+      ` table ${tableId} round ${currentRound} function roundDealerSetTimer`
+    );
+
+    let msg = MESSAGES.ERROR.COMMON_ERROR;
+    let nonProdMsg = "";
+    let errorCode = 500;
+
+    if (error instanceof Errors.InvalidInput) {
+      nonProdMsg = "Invalid Input";
+      commonEventEmitter.emit(EVENT.SHOW_POPUP_ROOM_SOCKET_EVENT, {
+        tableId: tableId,
+        data: {
+          isPopup: true,
+          popupType: MESSAGES.ALERT_MESSAGE.TYPE.COMMON_POPUP,
+          title: nonProdMsg,
+          message: msg,
+          tableId,
+          buttonCounts: NUMERICAL.ONE,
+          button_text: [MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.EXIT],
+          button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED],
+          button_methods: [MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.EXIT],
+        },
+      });
+    }
+
+    Logger.info(tableId, "ERROR ===>>", error);
+
+    throw error;
+  }
 };
+
+export default roundDealerSetTimer;
