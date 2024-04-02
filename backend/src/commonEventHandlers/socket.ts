@@ -9,6 +9,7 @@ import {
   roundDealerSetTimer,
   tossCardTimer,
 } from "../services/initializeRound";
+import { secondaryTimer } from "../services/turn";
 
 interface IResponseData {
   eventName: string;
@@ -154,3 +155,7 @@ commonEventEmitter.on(
   EVENT.USER_TURN_STARTED_SOCKET_EVENT,
   startUserTurnSocket
 );
+
+commonEventEmitter.on(EVENT_EMITTER.PLAYER_TURN_TIMER_EXPIRED, secondaryTimer);
+
+commonEventEmitter.on(EVENT.EXPIRE_SECONDERY_TIMER);

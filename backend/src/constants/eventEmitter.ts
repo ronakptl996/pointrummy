@@ -15,6 +15,6 @@ export default Object.freeze({
   NEW_GAME_START_TIMER_EXPIRED: "newGameStartTimerExpired",
   SHOW_AFTER_EXPIRE_SCORE_BOARD_VIEW: "showAfterExpireScoreBoardView",
   EXPIRE_SCORE_BOARD_TIMER: "expireScoreBoardTimer",
-  EXIRE_SECONDERY_TIMER: "expireSeconderyTimer",
+  EXPIRE_SECONDERY_TIMER: "expireSeconderyTimer",
   REMOVE_SOCKER_ID_FOR_JOIN_TABLE: "removeSockerIDForJoinTable",
 });

@@ -56,3 +56,8 @@ export interface IStartUserTurnResponse {
   isRemainSeconderyTurns: boolean;
   tableId: string;
 }
+
+export interface IOnTurnExpireCall {
+  tableId: string;
+  userId: string;
+}

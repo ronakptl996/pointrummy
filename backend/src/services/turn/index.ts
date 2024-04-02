@@ -1,3 +1,4 @@
+import secondaryTimer from "./secondaryTimer";
 import startUserTurn from "./startUserTurn";
 
-export { startUserTurn };
+export { startUserTurn, secondaryTimer };

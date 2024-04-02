@@ -9,6 +9,7 @@ import { formatStartUserTurn } from "../../formatResponseData";
 import { IStartUserTurnResponse } from "../../interfaces/round";
 import { IDefaultTableGamePlay } from "../../interfaces/tableGamePlay";
 import Logger from "../../logger";
+import startPlayerTurnTimer from "../../scheduler/queues/playerTurnTimer.queue";
 import { addTurnHistory } from "../turnHistory";
 
 const startUserTurn = async (
@@ -95,6 +96,20 @@ const startUserTurn = async (
 
     // Add Turn Details in History
     await addTurnHistory(tableId, currentRound, tableGamePlay, playerGamePlay);
+
+    await startPlayerTurnTimer({
+      timer: tableConfig.userTurnTimer,
+      jobId: `${tableId}:${playerGamePlay?.userId}:${tableConfig.currentRound}`,
+      tableId: tableConfig._id,
+      userId: playerGamePlay.userId,
+    });
+
+    Logger.info(
+      tableId,
+      `Ending startUserTurn for tableId : ${tableId} and round : ${currentRound} user ${currentTurnUserId}`
+    );
+
+    return { success: true, error: null, tableId };
   } catch (error) {
     Logger.info(tableId, error);
     Logger.error(tableId, error, ` table ${tableId} function startUserTurn `);
