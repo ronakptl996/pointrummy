@@ -94,4 +94,24 @@ const addClientInRoom = async (
   }
 };
 
-export { sendEventToClient, addClientInRoom, sendEventToRoom };
+const leaveClientInRoom = async (socket: any, roomId: any) => {
+  const tableId = roomId;
+  try {
+    Logger.info(tableId, "leaveClientInRoom :: >>>", roomId);
+    if (socket !== "string" && socket.emit) {
+      if (typeof socket != "undefined" && socket.emit) socket.leave(roomId);
+    } else {
+      socket = await global.IO.sockets.sockets.get(socket);
+      if (typeof socket != "undefined" && socket.emit) socket.leave(roomId);
+    }
+  } catch (error) {
+    Logger.error(tableId, "LEAVE CLIENT SOCKET ROOM :: ERROR ::", error);
+  }
+};
+
+export {
+  sendEventToClient,
+  addClientInRoom,
+  sendEventToRoom,
+  leaveClientInRoom,
+};

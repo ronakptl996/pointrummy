@@ -11,3 +11,13 @@ export interface ILeaveTableInput {
   currentRound: number;
   isLeaveFromScoreBoard: boolean;
 }
+
+// Discardcard Request & Response
+export interface IDiscardCardRes {
+  userId: string;
+  si: number;
+  tableId: string;
+  cards: Array<ICards>;
+  totalScorePoint: number;
+  opendDeck: Array<string>;
+}

@@ -73,6 +73,17 @@ const incrCounterLobbyWise = (onlinePlayerLobby: string, lobbId: string) => {
   }
 };
 
+const decrCounterLobbyWise = (onlinePlayerLobby: string, lobbyId: string) => {
+  try {
+    return redis.setDecrementCounter(
+      `${REDIS.ONLINE_USER_COUNTER}:${lobbyId}:${onlinePlayerLobby}`
+    );
+  } catch (error) {
+    Logger.error("CATCH_ERROR : decrCounterLobbyWise", error);
+    throw error;
+  }
+};
+
 export {
   getOnlinePlayerCount,
   setPlayerCounterInitialValue,
@@ -80,4 +91,5 @@ export {
   getOnlinePlayerCountLobbyWise,
   setCounterInitialValueLobby,
   incrCounterLobbyWise,
+  decrCounterLobbyWise,
 };

@@ -5,6 +5,7 @@ import { userProfileCache, playerGamePlayCache } from "../cache";
 import { diffSeconds } from "../common";
 import { NUMERICAL, TABLE_STATE } from "../constants";
 import {
+  discardCardResponseFormator,
   gtiResponseFormator,
   joinTableResponseFormator,
   providedCardResponseFormator,
@@ -29,7 +30,7 @@ import {
   ITossWinnerData,
   ITosscard,
 } from "../interfaces/round";
-import { ICards } from "../interfaces/inputOutputDataFormator";
+import { ICards, IDiscardCardRes } from "../interfaces/inputOutputDataFormator";
 
 const { GAME_START_TIMER, LOCK_IN_TIMER, MAXIMUM_TABLE_CREATE_LIMIT } =
   config.getConfig();
@@ -288,6 +289,39 @@ const formatJoinTableData = async (
   }
 };
 
+const formatDiscardCardData = async (
+  userId: string,
+  seatIndex: number,
+  tableId: string,
+  cards: Array<ICards>,
+  totalScorePoint: number,
+  opencards: Array<string>
+) => {
+  try {
+    const data: IDiscardCardRes = {
+      userId,
+      si: seatIndex,
+      tableId,
+      cards,
+      totalScorePoint,
+      opendDeck: opencards,
+    };
+
+    const validatedDiscardCardResponse: IDiscardCardRes =
+      await discardCardResponseFormator(data);
+
+    return validatedDiscardCardResponse;
+  } catch (error) {
+    Logger.error(
+      tableId,
+      `formatDiscardCardData for table ${tableId} for user ${userId}`,
+      error
+    );
+    Logger.info(tableId, "formatDiscardCardData() ERROR :::", error);
+    throw new Error(`formatDiscardCardData() ERROR ::: ${error}`);
+  }
+};
+
 const formatTossCardData = async (
   tableId: string,
   tossCardArr: Array<ITosscard>,
@@ -425,4 +459,5 @@ export {
   formatSetDealerData,
   formatProvidedCards,
   formatStartUserTurn,
+  formatDiscardCardData,
 };

@@ -82,6 +82,15 @@ const setIncrementCounter = async (key: string) => {
   });
 };
 
+const setDecrementCounter = async (key: string) => {
+  return new Promise(function (resolve, reject) {
+    global.redisClient
+      .decr(key)
+      .then((res: any) => resolve(res))
+      .catch((err: any) => reject(err));
+  });
+};
+
 export = {
   setValueInKey,
   getValueFromKey,
@@ -90,4 +99,5 @@ export = {
   pushIntoQueue,
   popFromQueue,
   setIncrementCounter,
+  setDecrementCounter,
 };

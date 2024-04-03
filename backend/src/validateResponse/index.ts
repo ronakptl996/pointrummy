@@ -15,6 +15,8 @@ import tossCardResponseValidator from "../validators/responseValidator/tossCardR
 import setDealerResponseValidator from "../validators/responseValidator/setDealerResponse";
 import providedCardsValidator from "../validators/responseValidator/providedCardsValidator";
 import userTurnResponseValidator from "../validators/responseValidator/userTurnResponse";
+import { IDiscardCardRes } from "../interfaces/inputOutputDataFormator";
+import discardCardResponseValidator from "../validators/responseValidator/discardCardsResponse";
 
 const gtiResponseFormator = async (
   gtiResponse: INewGTIResponse
@@ -103,6 +105,19 @@ const userTurnResponseFormator = async (
   }
 };
 
+const discardCardResponseFormator = async (
+  discardCardData: IDiscardCardRes
+) => {
+  const tableId = discardCardData.tableId;
+  try {
+    Joi.assert(discardCardData, discardCardResponseValidator());
+    return discardCardData;
+  } catch (error) {
+    Logger.error(tableId, error, "-", discardCardData);
+    throw new Error(`discardCardResponseFormator() Error :: ${error}`);
+  }
+};
+
 export {
   gtiResponseFormator,
   joinTableResponseFormator,
@@ -111,4 +126,5 @@ export {
   setDealerResponseFormator,
   providedCardResponseFormator,
   userTurnResponseFormator,
+  discardCardResponseFormator,
 };
