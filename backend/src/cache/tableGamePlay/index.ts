@@ -39,4 +39,18 @@ const insertTableGamePlay = async (
   } catch (error) {}
 };
 
-export default { getTableGamePlay, insertTableGamePlay };
+const deleteTableGamePlay = async (tableId: string) => {
+  const key = `${REDIS.TABLE_GAME_PLAY}:${tableId}`;
+  try {
+    return redis.deleteKey(key);
+  } catch (error) {
+    Logger.error(
+      tableId,
+      `Error in deleteTableGamePlay for key ${key} `,
+      error
+    );
+    return false;
+  }
+};
+
+export default { getTableGamePlay, insertTableGamePlay, deleteTableGamePlay };

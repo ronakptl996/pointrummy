@@ -23,4 +23,14 @@ const setTurnHistory = async (tableId: string, value: Array<IGameDetails>) => {
   }
 };
 
-export default { getTurnHistory, setTurnHistory };
+const deleteTurnHistory = (tableId: string) => {
+  const key = `${REDIS.TURN_HISTORY}:${tableId}`;
+  try {
+    return redis.deleteKey(key);
+  } catch (error) {
+    Logger.error(tableId, `Error in deleteTurnHistory for key ${key}`, error);
+    return false;
+  }
+};
+
+export default { getTurnHistory, setTurnHistory, deleteTurnHistory };

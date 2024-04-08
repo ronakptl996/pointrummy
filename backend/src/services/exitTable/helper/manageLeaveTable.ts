@@ -6,8 +6,18 @@ import {
   tableGamePlayCache,
   userProfileCache,
 } from "../../../cache";
-import { NUMERICAL, PLAYER_STATE, TABLE_STATE } from "../../../constants";
+import {
+  EVENT,
+  MESSAGES,
+  NUMERICAL,
+  PLAYER_STATE,
+  TABLE_STATE,
+} from "../../../constants";
 import { ISeats } from "../../../interfaces/signup";
+import emitLeaveTableEvent from "./emitLeaveTableEvent";
+import { removeQueue, setQueue } from "../../common/queue";
+import cancelWaitingForPlayerTimer from "../../../scheduler/cancelJob/waitingForPlayerTimer.cancel";
+import cancelRoundTimerStart from "../../../scheduler/cancelJob/roundTimerStart.cancel";
 
 const manageLeaveTable = async (
   userId: string,
@@ -87,6 +97,147 @@ const manageLeaveTable = async (
         " tableGamePlay.tableState :: ",
         tableGamePlay.tableState
       );
+
+      await emitLeaveTableEvent(
+        tableId,
+        playerGamePlay,
+        userProfile,
+        PLAYER_STATE.LEAVE,
+        tableGamePlay.currentPlayerInTable,
+        tableGamePlay.tableState,
+        isLeaveEventSend,
+        socketId
+      );
+
+      if (tableGamePlay.currentPlayerInTable === NUMERICAL.ZERO) {
+        await removeQueue(tableId);
+        await Promise.all([
+          await tableGamePlayCache.deleteTableGamePlay(tableId),
+          await tableConfigCache.deleteTableConfig(tableId),
+          await playerGamePlayCache.deletePlayerGamePlay(userId, tableId),
+        ]);
+      } else {
+        Logger.info(
+          " manageLeaveTable :: waiting :: tableGamePlay :: ",
+          tableGamePlay
+        );
+
+        if (
+          tableGamePlay.currentPlayerInTable < Number(tableConfig.minPlayer)
+        ) {
+          await cancelWaitingForPlayerTimer(
+            `waitingForPlayerTimer:${tableId}`,
+            tableId
+          );
+          await cancelRoundTimerStart(
+            `${tableConfig.gameType}:roundTimerStart:${tableId}`,
+            tableId
+          );
+
+          Logger.info(
+            tableId,
+            "-------------->> POPUP :: 2 <<---------------------"
+          );
+
+          tableGamePlay.tableState = TABLE_STATE.WAITING_FOR_PLAYERS;
+          tableGamePlay.isnextRound = false;
+
+          await setQueue(tableId);
+
+          let nonProdMsg = "Waiting for players";
+          commonEventEmitter.emit(EVENT.SHOW_POPUP_ROOM_SOCKET_EVENT, {
+            tableId,
+            data: {
+              isPopup: true,
+              popupType: MESSAGES.ALERT_MESSAGE.TYPE.TOAST_POPUP,
+              title: nonProdMsg,
+              message: MESSAGES.ERROR.WAITING_FOR_ANTHOR_PLAYERS,
+              showTimer: true,
+              tableId,
+            },
+          });
+        }
+
+        if (
+          (tableGamePlay.currentPlayerInTable === NUMERICAL.ONE &&
+            tableConfig.noOfPlayer === NUMERICAL.TWO) ||
+          (tableGamePlay.currentPlayerInTable === NUMERICAL.THREE &&
+            tableConfig.noOfPlayer === NUMERICAL.FOUR) ||
+          (tableGamePlay.currentPlayerInTable === NUMERICAL.FIVE &&
+            tableConfig.noOfPlayer === NUMERICAL.SIX)
+        ) {
+          await setQueue(tableId);
+        }
+
+        await Promise.all([
+          await playerGamePlayCache.deletePlayerGamePlay(userId, tableId),
+          await tableGamePlayCache.insertTableGamePlay(tableGamePlay, tableId),
+        ]);
+      }
+    } else if (
+      tableGamePlay.tableState === TABLE_STATE.LOCK_IN_PERIOD ||
+      tableGamePlay.tableState === TABLE_STATE.COLLECTING_BOOT_VALUE
+    ) {
+      Logger.info(
+        "playerGamePlay.userStatus ::: >> ",
+        playerGamePlay.userStatus
+      );
+
+      if (playerGamePlay.userStatus === PLAYER_STATE.WATCHING) {
+        tableGamePlay.seats.filter((seat, index) => {
+          if (seat.userId === userId) {
+            tableGamePlay.seats.splice(index, NUMERICAL.ONE);
+          }
+        });
+
+        await setQueue(tableId);
+        await emitLeaveTableEvent(
+          tableId,
+          playerGamePlay,
+          userProfile,
+          PLAYER_STATE.WATCHING_LEAVE,
+          tableGamePlay.currentPlayerInTable,
+          tableGamePlay.tableState,
+          isLeaveEventSend,
+          socketId
+        );
+
+        await Promise.all([
+          await tableGamePlayCache.insertTableGamePlay(tableGamePlay, tableId),
+          await playerGamePlayCache.deletePlayerGamePlay(userId, tableId),
+        ]);
+      } else {
+        commonEventEmitter.emit(EVENT.LOCK_IN_PERIOD_SOCKET_EVENT, {
+          socket: socketId,
+          data: {
+            tableId,
+            currentRound: NUMERICAL.ONE,
+            msg: MESSAGES.ERROR.LOCK_IN_PEROID_MSG,
+          },
+        });
+        Logger.info(
+          tableId,
+          " leaveTable :: LOCK_IN_PERIOD_SOCKET_EVENT ==>> LOCK_IN_TIMER : "
+        );
+        return false;
+      }
     }
-  } catch (error) {}
+    Logger.info(
+      " manageLeaveTable :: Ending  :: userId  ::",
+      userId,
+      "tableId :: ",
+      tableId,
+      "socketId :: ",
+      socketId,
+      "isLeaveEventSend :: ",
+      isLeaveEventSend
+    );
+    return true;
+  } catch (error) {
+    Logger.error(tableId, `manageLeaveTable Error :: ${error}`);
+    Logger.error(tableId, "<<======= manageLeaveTable() Error ======>>", error);
+    throw new Error("manage Leave Table data error");
+  }
 };
+
+export default manageLeaveTable;

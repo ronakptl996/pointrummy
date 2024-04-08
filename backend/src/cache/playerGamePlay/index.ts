@@ -47,4 +47,18 @@ const getPlayerGamePlay = async (
   }
 };
 
-export default { insertPlayerGamePlay, getPlayerGamePlay };
+const deletePlayerGamePlay = async (userId: string, tableId: string) => {
+  const key = `${REDIS.PLAYER_GAME_PLAY}:${userId}:${tableId}`;
+  try {
+    return await redis.deleteKey(key);
+  } catch (e) {
+    Logger.error(`Error in deletePlayerGamePlay for key ${key} `, e);
+    return false;
+  }
+};
+
+export default {
+  insertPlayerGamePlay,
+  getPlayerGamePlay,
+  deletePlayerGamePlay,
+};

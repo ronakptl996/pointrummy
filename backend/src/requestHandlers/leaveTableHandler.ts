@@ -8,8 +8,16 @@ import {
   tableConfigCache,
   tableGamePlayCache,
 } from "../cache";
-import { NUMERICAL, PLAYER_STATE, TABLE_STATE } from "../constants";
+import {
+  EVENT,
+  MESSAGES,
+  NUMERICAL,
+  PLAYER_STATE,
+  TABLE_STATE,
+} from "../constants";
 import { leaveClientInRoom } from "../socket";
+import leaveTable from "../services/exitTable";
+import commonEventEmitter from "../commonEventEmitter";
 
 const leaveTableHandler = async (
   socket: any,
@@ -157,5 +165,76 @@ const leaveTableHandler = async (
       }
       return false;
     }
-  } catch (error) {}
+    if (
+      (tableGamePlay.tableState === TABLE_STATE.WINNER_DECLARED &&
+        playerGamePlay.userStatus === PLAYER_STATE.DISCONNECTED) ||
+      tableGamePlay.tableState !== TABLE_STATE.WINNER_DECLARED
+    ) {
+      await leaveTable(userId, tableId, isLeaveEventSend, socketId);
+    }
+    return true;
+  } catch (error: any) {
+    Logger.error(tableId, `leaveTableHandler Error :: ${error}`);
+
+    let msg = MESSAGES.ERROR.COMMON_ERROR;
+    let nonProdMsg = "";
+    let errorCode = 500;
+
+    if (error instanceof Errors.InvalidInput) {
+      nonProdMsg = "Invalid Input";
+      commonEventEmitter.emit(EVENT.SHOW_POPUP_CLIENT_SOCKET_EVENT, {
+        socket: socketId,
+        data: {
+          isPopup: true,
+          popupType: MESSAGES.ALERT_MESSAGE.TYPE.COMMON_POPUP,
+          title: nonProdMsg,
+          message: msg,
+          tableId,
+          buttonCounts: NUMERICAL.ONE,
+          button_text: [MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.EXIT],
+          button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED],
+          button_methods: [MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.EXIT],
+        },
+      });
+    } else if (error instanceof Errors.UnknownError) {
+      nonProdMsg = "FAILED";
+
+      commonEventEmitter.emit(EVENT.SHOW_POPUP_CLIENT_SOCKET_EVENT, {
+        socket: socketId,
+        data: {
+          isPopup: true,
+          popupType: MESSAGES.ALERT_MESSAGE.TYPE.COMMON_POPUP,
+          title: nonProdMsg,
+          message: msg,
+          tableId,
+          buttonCounts: NUMERICAL.ONE,
+          button_text: [MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.EXIT],
+          button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED],
+          button_methods: [MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.EXIT],
+        },
+      });
+    } else {
+      commonEventEmitter.emit(EVENT.LEAVE_TABLE_SOCKET_EVENT, {
+        socket: socketId,
+        data: {
+          success: false,
+          error: {
+            errorCode,
+            errorMessage:
+              error && error.message && typeof error.message === "string"
+                ? error.message
+                : nonProdMsg,
+          },
+        },
+      });
+    }
+  } finally {
+    try {
+      if (lock) await Lock.getLock().release(lock);
+    } catch (error) {
+      Logger.error(tableId, error, "<<= leaveTable >> ");
+    }
+  }
 };
+
+export default leaveTableHandler;

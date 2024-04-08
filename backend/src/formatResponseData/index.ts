@@ -8,7 +8,9 @@ import {
   discardCardResponseFormator,
   gtiResponseFormator,
   joinTableResponseFormator,
+  leaveTableFormator,
   providedCardResponseFormator,
+  scoreBoardFormator,
   setDealerResponseFormator,
   tossCardResponseFormator,
   userTurnResponseFormator,
@@ -16,6 +18,8 @@ import {
 import {
   IDefaultTableConfig,
   INewGTIResponse,
+  IScoreBoardRes,
+  IUserResData,
   JTResponse,
 } from "../interfaces/tableConfig";
 import { IDefaultTableGamePlay } from "../interfaces/tableGamePlay";
@@ -30,7 +34,11 @@ import {
   ITossWinnerData,
   ITosscard,
 } from "../interfaces/round";
-import { ICards, IDiscardCardRes } from "../interfaces/inputOutputDataFormator";
+import {
+  ICards,
+  IDiscardCardRes,
+  ILeaveTableRes,
+} from "../interfaces/inputOutputDataFormator";
 
 const { GAME_START_TIMER, LOCK_IN_TIMER, MAXIMUM_TABLE_CREATE_LIMIT } =
   config.getConfig();
@@ -450,6 +458,91 @@ const formatStartUserTurn = async (
   }
 };
 
+const formatLeaveTableData = async (
+  tableId: string,
+  playerGamePlay: IDefaultPlayerGamePlay,
+  message: string,
+  updatedUserCount: number,
+  tableState: string
+) => {
+  try {
+    const data = {
+      userId: playerGamePlay.userId,
+      tableId,
+      currentRound: NUMERICAL.ONE,
+      name: playerGamePlay.username,
+      si: playerGamePlay.seatIndex,
+      pp: playerGamePlay.profilePic,
+      message,
+      updatedUserCount,
+      tableState,
+    };
+
+    const validatedLeaveTableResponse: ILeaveTableRes =
+      await leaveTableFormator(data);
+    return validatedLeaveTableResponse;
+  } catch (error) {
+    Logger.error(tableId, `formatLeaveTableData for table ${tableId} `, error);
+    throw new Error(`INTERNAL_ERROR_formatLeaveTableData() ${error}`);
+  }
+};
+
+const formatScoreBoardData = async (
+  tableId: string,
+  allUserPGP: Array<IUserResData>,
+  trumpCard: string[],
+  timer: number,
+  isScoreBoardShow: boolean,
+  isNewGameStart: boolean = true
+) => {
+  try {
+    const data = {
+      tableId,
+      scoreBoardTable: allUserPGP,
+      trumpCard,
+      timer,
+      isScoreBoardShow,
+      isNewGameStart,
+    };
+
+    const validatedScoreBoardRes: IScoreBoardRes = await scoreBoardFormator(
+      data
+    );
+    return validatedScoreBoardRes;
+  } catch (error) {
+    Logger.error(tableId, `formatScoreBoardData for table ${tableId} `, error);
+    throw new Error(`INTERNAL_ERROR_formatScoreBoardData() ${error}`);
+  }
+};
+
+const formatNewScoreBoardData = async (
+  tableId: string,
+  allUserPGP: Array<IUserResData>,
+  trumpCard: string[],
+  timer: number,
+  isScoreBoardShow: boolean,
+  isNewGameStart: boolean = false
+) => {
+  try {
+    const data = {
+      tableId,
+      scoreBoardTable: allUserPGP,
+      trumpCard,
+      timer,
+      isScoreBoardShow,
+      isNewGameStart,
+    };
+
+    const validatedScoreBoardRes: IScoreBoardRes = await scoreBoardFormator(
+      data
+    );
+    return validatedScoreBoardRes;
+  } catch (error) {
+    Logger.error(tableId, `formatScoreBoardData for table ${tableId} `, error);
+    throw new Error(`INTERNAL_ERROR_formatScoreBoardData() ${error}`);
+  }
+};
+
 export {
   formateRejoinTableData,
   formateUpdatedGameTableData,
@@ -460,4 +553,7 @@ export {
   formatProvidedCards,
   formatStartUserTurn,
   formatDiscardCardData,
+  formatLeaveTableData,
+  formatScoreBoardData,
+  formatNewScoreBoardData,
 };

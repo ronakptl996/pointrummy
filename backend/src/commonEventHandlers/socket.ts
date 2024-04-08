@@ -9,7 +9,8 @@ import {
   roundDealerSetTimer,
   tossCardTimer,
 } from "../services/initializeRound";
-import { secondaryTimer } from "../services/turn";
+import { changeTurn, secondaryTimer } from "../services/turn";
+import onTurnExpire from "../services/turn/turnExpire";
 
 interface IResponseData {
   eventName: string;
@@ -158,4 +159,9 @@ commonEventEmitter.on(
 
 commonEventEmitter.on(EVENT_EMITTER.PLAYER_TURN_TIMER_EXPIRED, secondaryTimer);
 
-commonEventEmitter.on(EVENT.EXPIRE_SECONDERY_TIMER);
+commonEventEmitter.on(EVENT_EMITTER.EXPIRE_SECONDERY_TIMER, onTurnExpire);
+
+// commonEventEmitter.on(EVENT.EXPIRE_SCORE_BOARD_TIMER, )
+commonEventEmitter.on(EVENT_EMITTER.NEXT_TURN_DELAY, (res) => {
+  changeTurn(res.tableId);
+});

@@ -9,6 +9,9 @@ import {
 } from "../../cache";
 import { IOnTurnExpireCall } from "../../interfaces/round";
 import { NUMERICAL } from "../../constants";
+import leaveTableHandler from "../../requestHandlers/leaveTableHandler";
+import cancelPlayerTurnTimer from "../../scheduler/cancelJob/playerTurnTimer.cancel";
+import cancelSeconderyTimer from "../../scheduler/cancelJob/secondaryTimer.cancel";
 
 const { CONTINUE_MISSING_TURN_COUNT } = config.getConfig();
 
@@ -56,7 +59,7 @@ const onTurnExpire = async (data: IOnTurnExpireCall) => {
     tableGamePlay.isSeconderyTimer = false;
 
     if (currentCards.length == NUMERICAL.FOURTEEN) {
-      // autoDiscard
+      // (IMPLEMENT) autoDiscard
     } else {
       Logger.info(
         tableId,
@@ -74,9 +77,49 @@ const onTurnExpire = async (data: IOnTurnExpireCall) => {
       );
 
       if (playerGamePlay.turnTimeOut > Number(CONTINUE_MISSING_TURN_COUNT)) {
-        // (IMPLEMENT) LeaveTableFormator
+        leaveTableHandler(
+          { id: userData.socketId, tableId: tableId, userId: userId },
+          {
+            userId,
+            tableId,
+            currentRound: NUMERICAL.ONE,
+            isLeaveFromScoreBoard: false,
+          }
+        );
         return { success: true, error: null, tableId };
       }
     }
-  } catch (error) {}
+
+    await cancelPlayerTurnTimer(
+      `${tableId}:${playerGamePlay.userId}:${tableConfig.currentRound}`,
+      tableId
+    );
+
+    await cancelSeconderyTimer(
+      `${tableId}:${playerGamePlay.userId}:${tableConfig.currentRound}`,
+      tableId
+    );
+
+    Logger.info(
+      tableId,
+      `Ending onTurnExpire for tableId : ${tableId} ,userId : ${userId} and round : ${currentRound}`
+    );
+    return { success: true, error: null, tableId };
+  } catch (error) {
+    Logger.error(
+      tableId,
+      error,
+      `table ${tableId} user ${userId} function onTurnExpire`
+    );
+    Logger.info(tableId, "onTurnExpire() Error :: ==>", error);
+    throw new Error(`onTurnExpire() Error :: ==> ${error}`);
+  } finally {
+    try {
+      if (lock) await Lock.getLock().release(lock);
+    } catch (error) {
+      Logger.error(tableId, error, " leaveTable ");
+    }
+  }
 };
+
+export default onTurnExpire;

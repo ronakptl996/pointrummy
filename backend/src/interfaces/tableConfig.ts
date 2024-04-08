@@ -1,6 +1,27 @@
 import { ICards } from "./inputOutputDataFormator";
 import { ISeats } from "./signup";
 
+export interface IUserResData {
+  userId: string;
+  si: number;
+  pp: string;
+  userName: string;
+  amount: string;
+  cards: Array<ICards>;
+  score: number;
+  result: string;
+  isDeclared: boolean;
+}
+
+export interface IScoreBoardRes {
+  tableId: string;
+  isScoreBoardShow: boolean;
+  scoreBoardTable: Array<IUserResData>;
+  trumpCard: string[];
+  timer: number;
+  isNewGameStart: boolean;
+}
+
 export interface IFormatedJTResponse {
   tableId: string;
   entryFee: number;

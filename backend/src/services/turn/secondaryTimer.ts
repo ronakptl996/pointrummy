@@ -11,8 +11,11 @@ import { EVENT, NUMERICAL } from "../../constants";
 import insertPlayerInTable from "../userPlayTable/insertPlayerInTable";
 import { formatStartUserTurn } from "../../formatResponseData";
 import { IStartUserTurnResponse } from "../../interfaces/round";
+import secondaryTimerStart from "../../scheduler/queues/secondaryTimer.queue";
+import onTurnExpire from "./turnExpire";
 
 const secondaryTimer = async (data: IPlayerTurnTimer) => {
+  const { SECONDARY_TIMER } = config.getConfig();
   const { userId, tableId } = data;
   try {
     const tableConfig = await tableConfigCache.getTableConfig(tableId);
@@ -71,8 +74,25 @@ const secondaryTimer = async (data: IPlayerTurnTimer) => {
         tableId: tableId,
         data: formatedStartUserTurnData,
       });
+
+      await secondaryTimerStart({
+        timer: Number(SECONDARY_TIMER),
+        jobId: data.jobId,
+        tableId: data.tableId,
+        userId: data.userId,
+      });
+    } else {
+      Logger.info(
+        tableId,
+        ` seconderyTimer :: seconderyTimerCounts :: ${playerGamePlay.seconderyTimerCounts}`
+      );
+      Logger.info(tableId, ` seconderyTimer :: onTurnExpire`);
+
+      onTurnExpire(data);
     }
-  } catch (error) {}
+  } catch (error) {
+    Logger.error(tableId, "--- seconderyTimer ::: ERROR :: ", error);
+  }
 };
 
 export default secondaryTimer;

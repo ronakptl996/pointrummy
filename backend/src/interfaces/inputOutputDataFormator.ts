@@ -12,6 +12,18 @@ export interface ILeaveTableInput {
   isLeaveFromScoreBoard: boolean;
 }
 
+export interface ILeaveTableRes {
+  userId: string;
+  tableId: string;
+  currentRound: number;
+  name: string;
+  si: number;
+  pp: string;
+  message: string;
+  updatedUserCount: number;
+  tableState: string;
+}
+
 // Discardcard Request & Response
 export interface IDiscardCardRes {
   userId: string;

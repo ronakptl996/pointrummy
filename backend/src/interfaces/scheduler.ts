@@ -4,3 +4,9 @@ export interface IPlayerTurnTimer {
   tableId: string;
   userId: string;
 }
+
+export interface IScoreBoardTimer {
+  timer: number;
+  jobId: string;
+  tableId: string;
+}

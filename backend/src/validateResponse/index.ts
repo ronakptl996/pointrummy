@@ -1,6 +1,10 @@
 import Joi from "joi";
 import Logger from "../logger";
-import { INewGTIResponse, JTResponse } from "../interfaces/tableConfig";
+import {
+  INewGTIResponse,
+  IScoreBoardRes,
+  JTResponse,
+} from "../interfaces/tableConfig";
 import {
   ICountDown,
   IFormateProvidedCards,
@@ -15,8 +19,13 @@ import tossCardResponseValidator from "../validators/responseValidator/tossCardR
 import setDealerResponseValidator from "../validators/responseValidator/setDealerResponse";
 import providedCardsValidator from "../validators/responseValidator/providedCardsValidator";
 import userTurnResponseValidator from "../validators/responseValidator/userTurnResponse";
-import { IDiscardCardRes } from "../interfaces/inputOutputDataFormator";
+import {
+  IDiscardCardRes,
+  ILeaveTableRes,
+} from "../interfaces/inputOutputDataFormator";
 import discardCardResponseValidator from "../validators/responseValidator/discardCardsResponse";
+import leaveTableResponseValidator from "../validators/responseValidator/leaveTableResponse";
+import scoreBoardValidator from "../validators/responseValidator/scoreBoardRes";
 
 const gtiResponseFormator = async (
   gtiResponse: INewGTIResponse
@@ -118,6 +127,28 @@ const discardCardResponseFormator = async (
   }
 };
 
+const leaveTableFormator = async (leaveData: ILeaveTableRes) => {
+  const tableId = leaveData.tableId;
+  try {
+    Joi.assert(leaveData, leaveTableResponseValidator());
+    return leaveData;
+  } catch (error) {
+    Logger.error(tableId, error, "-", leaveData);
+    throw new Error(`leaveTableFormator() ${error}`);
+  }
+};
+
+const scoreBoardFormator = async (scoreBoardData: IScoreBoardRes) => {
+  const tableId = scoreBoardData.tableId;
+  try {
+    Joi.assert(scoreBoardData, scoreBoardValidator());
+    return scoreBoardData;
+  } catch (error) {
+    Logger.error(tableId, error, "-", scoreBoardData);
+    throw new Error(`scoreBoardFormator() ${error}`);
+  }
+};
+
 export {
   gtiResponseFormator,
   joinTableResponseFormator,
@@ -127,4 +158,6 @@ export {
   providedCardResponseFormator,
   userTurnResponseFormator,
   discardCardResponseFormator,
+  leaveTableFormator,
+  scoreBoardFormator,
 };

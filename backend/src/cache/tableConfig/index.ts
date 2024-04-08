@@ -54,9 +54,20 @@ const getTableConfig = async (
   }
 };
 
+const deleteTableConfig = async (tableId: string) => {
+  const key = `${REDIS.GAME_TABLE}:${tableId}`;
+  try {
+    return redis.deleteKey(key);
+  } catch (e) {
+    Logger.error(tableId, `Error in deleteTableConfig for key ${key} `, e);
+    return false;
+  }
+};
+
 export default {
   getTableFromQueue,
   setTableFromQueue,
   getTableConfig,
   setTableConfig,
+  deleteTableConfig,
 };
