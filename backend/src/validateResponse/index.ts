@@ -22,10 +22,14 @@ import userTurnResponseValidator from "../validators/responseValidator/userTurnR
 import {
   IDiscardCardRes,
   ILeaveTableRes,
+  IPickCardFormCloseDackResponse,
+  IResuffalDataRes,
 } from "../interfaces/inputOutputDataFormator";
 import discardCardResponseValidator from "../validators/responseValidator/discardCardsResponse";
 import leaveTableResponseValidator from "../validators/responseValidator/leaveTableResponse";
 import scoreBoardValidator from "../validators/responseValidator/scoreBoardRes";
+import pickCardResponseValidator from "../validators/responseValidator/pickCardResponseValidator";
+import reshuffaleResponseValidator from "../validators/responseValidator/reshuffalResponse";
 
 const gtiResponseFormator = async (
   gtiResponse: INewGTIResponse
@@ -149,6 +153,30 @@ const scoreBoardFormator = async (scoreBoardData: IScoreBoardRes) => {
   }
 };
 
+const pickCardResponseFormator = async (
+  pickCardData: IPickCardFormCloseDackResponse
+) => {
+  const tableId = pickCardData.tableId;
+  try {
+    Joi.assert(pickCardData, pickCardResponseValidator());
+    return pickCardData;
+  } catch (error) {
+    Logger.error(tableId, error, "-", pickCardData);
+    throw new Error(`pickCardResponseFormator() Error :: ${error}`);
+  }
+};
+
+const reshuffaleResponseFormator = async (reshuffalData: IResuffalDataRes) => {
+  const tableId = reshuffalData.tableId;
+  try {
+    Joi.assert(reshuffalData, reshuffaleResponseValidator());
+    return reshuffalData;
+  } catch (error) {
+    Logger.error(tableId, error, "-", reshuffalData);
+    throw new Error(`resuffalResponseFormator() Error :: ${error}`);
+  }
+};
+
 export {
   gtiResponseFormator,
   joinTableResponseFormator,
@@ -160,4 +188,6 @@ export {
   discardCardResponseFormator,
   leaveTableFormator,
   scoreBoardFormator,
+  pickCardResponseFormator,
+  reshuffaleResponseFormator,
 };

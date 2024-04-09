@@ -12,6 +12,22 @@ export interface ILeaveTableInput {
   isLeaveFromScoreBoard: boolean;
 }
 
+export interface IPickCardFromCloseDackInput {
+  userId: string;
+  tableId: string;
+  currentRound: number;
+}
+
+export interface IPickCardFormCloseDackResponse {
+  userId: string;
+  si: number;
+  tableId: string;
+  cards: Array<ICards>;
+  totalScorePoint: number;
+  msg: string;
+  pickUpCard: string;
+}
+
 export interface ILeaveTableRes {
   userId: string;
   tableId: string;
@@ -32,4 +48,11 @@ export interface IDiscardCardRes {
   cards: Array<ICards>;
   totalScorePoint: number;
   opendDeck: Array<string>;
+}
+
+// Resuffal Data
+export interface IResuffalDataRes {
+  closedDeck: Array<string>;
+  openDeck: Array<string>;
+  tableId: string;
 }

@@ -1,6 +1,7 @@
 import { EVENT } from "../constants";
 import Logger from "../logger";
 import joinTable from "../services/playTable/joinTable";
+import pickCardFromCloseDackHandler from "./pickCardFromCloseDack";
 import signUpHandler from "./signUpHandler";
 
 async function requestHandler(
@@ -36,6 +37,14 @@ async function requestHandler(
         ) {
           await joinTable(response, socket, false);
         }
+        if (response && response["reconnect"]) {
+          await joinTable(response, socket, true);
+        }
+        break;
+
+      case EVENT.PICK_FROM_CLOSE_DECK_SOCKET_EVENT:
+        response = await pickCardFromCloseDackHandler(socket, body.data);
+        break;
     }
   } catch (error) {
     Logger.error("requestHandler ERROR :: >> ", error);

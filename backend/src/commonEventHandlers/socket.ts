@@ -9,7 +9,7 @@ import {
   roundDealerSetTimer,
   tossCardTimer,
 } from "../services/initializeRound";
-import { changeTurn, secondaryTimer } from "../services/turn";
+import { changeTurn, secondaryTimer, startUserTurn } from "../services/turn";
 import onTurnExpire from "../services/turn/turnExpire";
 
 interface IResponseData {
@@ -117,6 +117,17 @@ const startUserTurnSocket = (payload: any) => {
   sendEventToRoom(tableId, responseData);
 };
 
+const pickCardFromClosedDeck = (payload: any) => {
+  const { data, tableId } = payload;
+  const responseData: IResponseData = {
+    eventName: EVENT.PICK_FROM_CLOSE_DECK_SOCKET_EVENT,
+    data,
+  };
+
+  Logger.debug(tableId, "SEND EVENT TO TABLE :: ", responseData);
+  sendEventToRoom(tableId, responseData);
+};
+
 commonEventEmitter.on(EVENT.SHOW_POPUP_CLIENT_SOCKET_EVENT, popUpEventClient);
 
 commonEventEmitter.on(EVENT.ADD_PLAYER_IN_TABLE, addPlayerInTable);
@@ -165,3 +176,12 @@ commonEventEmitter.on(EVENT_EMITTER.EXPIRE_SECONDERY_TIMER, onTurnExpire);
 commonEventEmitter.on(EVENT_EMITTER.NEXT_TURN_DELAY, (res) => {
   changeTurn(res.tableId);
 });
+
+commonEventEmitter.on(EVENT_EMITTER.START_USER_TURN, (res) => {
+  startUserTurn(res.tableId, res.userId, res.seatIndex, res.tableGamePlay);
+});
+
+commonEventEmitter.on(
+  EVENT.PICK_FROM_CLOSE_DECK_SOCKET_EVENT,
+  pickCardFromClosedDeck
+);

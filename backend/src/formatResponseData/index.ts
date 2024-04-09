@@ -9,7 +9,9 @@ import {
   gtiResponseFormator,
   joinTableResponseFormator,
   leaveTableFormator,
+  pickCardResponseFormator,
   providedCardResponseFormator,
+  reshuffaleResponseFormator,
   scoreBoardFormator,
   setDealerResponseFormator,
   tossCardResponseFormator,
@@ -38,6 +40,7 @@ import {
   ICards,
   IDiscardCardRes,
   ILeaveTableRes,
+  IResuffalDataRes,
 } from "../interfaces/inputOutputDataFormator";
 
 const { GAME_START_TIMER, LOCK_IN_TIMER, MAXIMUM_TABLE_CREATE_LIMIT } =
@@ -543,6 +546,62 @@ const formatNewScoreBoardData = async (
   }
 };
 
+const formatPickCardFormCloseDeckData = async (
+  userId: string,
+  seatIndex: number,
+  tableId: string,
+  cards: Array<ICards>,
+  totalScorePoint: number,
+  msg: string,
+  pickUpCard: string
+) => {
+  try {
+    const data = {
+      userId,
+      si: seatIndex,
+      tableId,
+      cards,
+      totalScorePoint,
+      msg,
+      pickUpCard: pickUpCard,
+    };
+
+    const validatedPickCardResponse = await pickCardResponseFormator(data);
+
+    return validatedPickCardResponse;
+  } catch (error) {
+    Logger.error(
+      tableId,
+      `formatPickCardData for table ${tableId} for user ${userId}`,
+      error
+    );
+    Logger.info(tableId, "formatPickCardData() ERROR :::", error);
+    throw new Error(`formatPickCardData() ERROR ::: ${error}`);
+  }
+};
+
+const formatResuffalData = async (
+  closedDeck: Array<string>,
+  openDeck: Array<string>,
+  tableId: string
+) => {
+  try {
+    const data: IResuffalDataRes = {
+      closedDeck,
+      openDeck,
+      tableId,
+    };
+
+    const validatedReshuffalDataResponse: IResuffalDataRes =
+      await reshuffaleResponseFormator(data);
+    return validatedReshuffalDataResponse;
+  } catch (error) {
+    Logger.error(tableId, `formatResuffalData ERROR`, error);
+    Logger.info(tableId, "formatResuffalData() ERROR :::", error);
+    throw new Error(`formatResuffalData() ERROR ::: ${error}`);
+  }
+};
+
 export {
   formateRejoinTableData,
   formateUpdatedGameTableData,
@@ -556,4 +615,6 @@ export {
   formatLeaveTableData,
   formatScoreBoardData,
   formatNewScoreBoardData,
+  formatPickCardFormCloseDeckData,
+  formatResuffalData,
 };

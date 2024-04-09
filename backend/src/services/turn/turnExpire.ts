@@ -12,6 +12,7 @@ import { NUMERICAL } from "../../constants";
 import leaveTableHandler from "../../requestHandlers/leaveTableHandler";
 import cancelPlayerTurnTimer from "../../scheduler/cancelJob/playerTurnTimer.cancel";
 import cancelSeconderyTimer from "../../scheduler/cancelJob/secondaryTimer.cancel";
+import nextTurnDelay from "../../scheduler/queues/nextTurnDelay.queue";
 
 const { CONTINUE_MISSING_TURN_COUNT } = config.getConfig();
 
@@ -99,6 +100,12 @@ const onTurnExpire = async (data: IOnTurnExpireCall) => {
       `${tableId}:${playerGamePlay.userId}:${tableConfig.currentRound}`,
       tableId
     );
+
+    await nextTurnDelay({
+      timer: NUMERICAL.ONE * NUMERICAL.ZERO,
+      jobId: `nextTurn:${tableId}:${currentRound}`,
+      tableId,
+    });
 
     Logger.info(
       tableId,

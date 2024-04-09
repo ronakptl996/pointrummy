@@ -2,8 +2,12 @@ import Joi from "joi";
 import Errors from "../errors";
 import signupFormatorValidator from "../requestValidator/signup";
 import { ISignUpInput } from "../interfaces/signup";
-import { ILeaveTableInput } from "../interfaces/inputOutputDataFormator";
+import {
+  ILeaveTableInput,
+  IPickCardFromCloseDackInput,
+} from "../interfaces/inputOutputDataFormator";
 import leaveTableValidator from "../validators/requestValidator/leaveTable";
+import pickCardFromCloseDackValidator from "../validators/requestValidator/pickCardFromCloseDack";
 
 const signUpFormator = async (
   signUpData: ISignUpInput
@@ -25,4 +29,15 @@ const leaveTableFormator = async (leaveTableData: ILeaveTableInput) => {
   }
 };
 
-export { signUpFormator, leaveTableFormator };
+const pickCardFromCloseDackFormator = async (
+  pickCard: IPickCardFromCloseDackInput
+) => {
+  try {
+    Joi.assert(pickCard, pickCardFromCloseDackValidator());
+    return pickCard;
+  } catch (error) {
+    throw new Errors.InvalidInput(error);
+  }
+};
+
+export { signUpFormator, leaveTableFormator, pickCardFromCloseDackFormator };
