@@ -40,6 +40,7 @@ import {
   ICards,
   IDiscardCardRes,
   ILeaveTableRes,
+  IPickCardFormOpenDackRes,
   IResuffalDataRes,
 } from "../interfaces/inputOutputDataFormator";
 
@@ -602,6 +603,41 @@ const formatResuffalData = async (
   }
 };
 
+const formatPickCardFromOpenDeckData = async (
+  userId: string,
+  seatIndex: number,
+  tableId: string,
+  cards: Array<ICards>,
+  totalScorePoint: number,
+  msg: string,
+  pickUpCard: string
+): Promise<IPickCardFormOpenDackRes> => {
+  try {
+    const data: IPickCardFormOpenDackRes = {
+      userId,
+      si: seatIndex,
+      tableId,
+      cards,
+      totalScorePoint,
+      msg,
+      pickUpCard,
+    };
+
+    const validatedPickCardResponse: IPickCardFormOpenDackRes =
+      await pickCardResponseFormator(data);
+
+    return validatedPickCardResponse;
+  } catch (error: any) {
+    Logger.error(
+      tableId,
+      `formatPickCardData for table ${tableId} for user ${userId}`,
+      error
+    );
+    Logger.info(tableId, "formatPickCardData() ERROR :::", error);
+    throw new Error(`formatPickCardData() ERROR ::: ${error}`);
+  }
+};
+
 export {
   formateRejoinTableData,
   formateUpdatedGameTableData,
@@ -616,5 +652,6 @@ export {
   formatScoreBoardData,
   formatNewScoreBoardData,
   formatPickCardFormCloseDeckData,
+  formatPickCardFromOpenDeckData,
   formatResuffalData,
 };

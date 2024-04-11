@@ -28,6 +28,22 @@ export interface IPickCardFormCloseDackResponse {
   pickUpCard: string;
 }
 
+export interface IPickCardFormOpenDackInput {
+  userId: string;
+  tableId: string;
+  currentRound: number;
+}
+
+export interface IPickCardFormOpenDackRes {
+  userId: string;
+  si: number;
+  tableId: string;
+  cards: Array<ICards>;
+  totalScorePoint: number;
+  msg: string;
+  pickUpCard: string;
+}
+
 export interface ILeaveTableRes {
   userId: string;
   tableId: string;
