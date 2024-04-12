@@ -128,6 +128,16 @@ const pickCardFromClosedDeck = (payload: any) => {
   sendEventToRoom(tableId, responseData);
 };
 
+const pickCardFromOpendDack = (payload: any) => {
+  const { socket, data, tableId } = payload;
+  const responseData = {
+    eventName: EVENT.PICK_FROM_OPEN_DECK_SOCKET_EVENT,
+    data,
+  };
+  Logger.debug(tableId, "SEND EVENT TO TABLE :: ", responseData);
+  sendEventToRoom(tableId, responseData);
+};
+
 commonEventEmitter.on(EVENT.SHOW_POPUP_CLIENT_SOCKET_EVENT, popUpEventClient);
 
 commonEventEmitter.on(EVENT.ADD_PLAYER_IN_TABLE, addPlayerInTable);
@@ -184,4 +194,9 @@ commonEventEmitter.on(EVENT_EMITTER.START_USER_TURN, (res) => {
 commonEventEmitter.on(
   EVENT.PICK_FROM_CLOSE_DECK_SOCKET_EVENT,
   pickCardFromClosedDeck
+);
+
+commonEventEmitter.on(
+  EVENT.PICK_FROM_OPEN_DECK_SOCKET_EVENT,
+  pickCardFromOpendDack
 );

@@ -3,6 +3,7 @@ import Errors from "../errors";
 import signupFormatorValidator from "../requestValidator/signup";
 import { ISignUpInput } from "../interfaces/signup";
 import {
+  IDiscardCardInput,
   ILeaveTableInput,
   IPickCardFormOpenDackInput,
   IPickCardFromCloseDackInput,
@@ -10,6 +11,7 @@ import {
 import leaveTableValidator from "../validators/requestValidator/leaveTable";
 import pickCardFromCloseDackValidator from "../validators/requestValidator/pickCardFromCloseDack";
 import pickCardFromOpenDeckValidator from "../validators/requestValidator/pickCardFromOpenDeck";
+import discardCardValidator from "../validators/requestValidator/discardCard";
 
 const signUpFormator = async (
   signUpData: ISignUpInput
@@ -53,9 +55,19 @@ const pickCardFromOpenDeckFormator = async (
   }
 };
 
+const discardCardDataFormator = async (discardCard: IDiscardCardInput) => {
+  try {
+    Joi.assert(discardCard, discardCardValidator());
+    return discardCard;
+  } catch (error) {
+    throw new Errors.InvalidInput(error);
+  }
+};
+
 export {
   signUpFormator,
   leaveTableFormator,
   pickCardFromCloseDackFormator,
   pickCardFromOpenDeckFormator,
+  discardCardDataFormator,
 };

@@ -72,3 +72,16 @@ export interface IResuffalDataRes {
   openDeck: Array<string>;
   tableId: string;
 }
+
+export interface IGroupCards {
+  card: string;
+  groupIndex: number;
+}
+
+/* discardCard Request & Response: start */
+export interface IDiscardCardInput {
+  userId: string;
+  tableId: string;
+  currentRound: number;
+  cards: Array<IGroupCards>;
+}

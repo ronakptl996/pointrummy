@@ -27,7 +27,7 @@ const pickCardFromOpenDeckHandler = async (
 ) => {
   const socketId = socket.id;
   const userId = String(pickCard.userId) || socket.userId;
-  const tableId = String(pickCard.userId) || socket.tableId;
+  const tableId = String(pickCard.tableId) || socket.tableId;
 
   let lock: any = null;
 

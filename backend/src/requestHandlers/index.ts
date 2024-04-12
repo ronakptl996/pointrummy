@@ -1,6 +1,7 @@
 import { EVENT } from "../constants";
 import Logger from "../logger";
 import joinTable from "../services/playTable/joinTable";
+import discardCardHandler from "./discardCardHandler";
 import pickCardFromCloseDackHandler from "./pickCardFromCloseDack";
 import pickCardFromOpenDeckHandler from "./pickCardFromOpenDeck";
 import signUpHandler from "./signUpHandler";
@@ -16,7 +17,15 @@ async function requestHandler(
     const body = typeof payload == "string" ? JSON.parse(payload) : payload;
     let response: any;
     console.log("Socket Event Handler called!!!");
-
+    if (reqEventName !== EVENT.HEART_BEAT_SOCKET_EVENT) {
+      Logger.info(
+        "-------------------------------------------------------------------------------------------------------------------------"
+      );
+      Logger.info("EVENT : UNITY-SIDE ============>>", reqEventName, body);
+      Logger.info(
+        "-------------------------------------------------------------------------------------------------------------------------"
+      );
+    }
     switch (reqEventName) {
       // Signup
       case EVENT.SIGN_UP_SOCKET_EVENT:
@@ -49,6 +58,11 @@ async function requestHandler(
 
       case EVENT.PICK_FROM_OPEN_DECK_SOCKET_EVENT:
         response = await pickCardFromOpenDeckHandler(socket, body.data);
+        break;
+
+      case EVENT.DISCARD_CARD_SOCKET_EVENT:
+        response = await discardCardHandler(socket, body.data);
+        break;
     }
   } catch (error) {
     Logger.error("requestHandler ERROR :: >> ", error);

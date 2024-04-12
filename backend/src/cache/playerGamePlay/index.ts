@@ -34,7 +34,6 @@ const getPlayerGamePlay = async (
     const playerGamePlay = await redis.getValueFromKey<IDefaultPlayerGamePlay>(
       keyData
     );
-
     if (playerGamePlay)
       Joi.assert(playerGamePlay, playerService.PlayerGamePlay.joiSchema());
 
