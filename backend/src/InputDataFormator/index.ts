@@ -4,6 +4,7 @@ import signupFormatorValidator from "../requestValidator/signup";
 import { ISignUpInput } from "../interfaces/signup";
 import {
   IDiscardCardInput,
+  IGroupCardInput,
   ILeaveTableInput,
   IPickCardFormOpenDackInput,
   IPickCardFromCloseDackInput,
@@ -12,6 +13,7 @@ import leaveTableValidator from "../validators/requestValidator/leaveTable";
 import pickCardFromCloseDackValidator from "../validators/requestValidator/pickCardFromCloseDack";
 import pickCardFromOpenDeckValidator from "../validators/requestValidator/pickCardFromOpenDeck";
 import discardCardValidator from "../validators/requestValidator/discardCard";
+import groupCardValidator from "../requestValidator/groupCard";
 
 const signUpFormator = async (
   signUpData: ISignUpInput
@@ -64,10 +66,20 @@ const discardCardDataFormator = async (discardCard: IDiscardCardInput) => {
   }
 };
 
+const groupCardFormator = async (groupCard: IGroupCardInput) => {
+  try {
+    Joi.assert(groupCard, groupCardValidator());
+    return groupCard;
+  } catch (error) {
+    throw new Errors.InvalidInput(error);
+  }
+};
+
 export {
   signUpFormator,
   leaveTableFormator,
   pickCardFromCloseDackFormator,
   pickCardFromOpenDeckFormator,
   discardCardDataFormator,
+  groupCardFormator,
 };

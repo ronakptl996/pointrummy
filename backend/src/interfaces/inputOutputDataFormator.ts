@@ -85,3 +85,19 @@ export interface IDiscardCardInput {
   currentRound: number;
   cards: Array<IGroupCards>;
 }
+
+// groupCard in Request & Response
+export interface IGroupCardInput {
+  userId: string;
+  tableId: string;
+  currentRound: number;
+  cards: Array<IGroupCards>;
+}
+
+export interface IGroupCardRes {
+  userId: string;
+  tableId: string;
+  cards: Array<ICards>;
+  totalScorePoint: number;
+  msg: string;
+}

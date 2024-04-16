@@ -1,7 +1,7 @@
 import { NUMERICAL } from "../constants";
 import Logger from "../logger";
 
-const autoMakeGroup = (currentCard: any) => {
+const autoMakeGroup = async (currentCard: any) => {
   try {
     let newGroup: string[] = [];
     let cardsGroup: string[][] = [];

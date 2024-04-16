@@ -6,6 +6,7 @@ import { diffSeconds } from "../common";
 import { NUMERICAL, TABLE_STATE } from "../constants";
 import {
   discardCardResponseFormator,
+  groupCardResponseFormator,
   gtiResponseFormator,
   joinTableResponseFormator,
   leaveTableFormator,
@@ -39,6 +40,7 @@ import {
 import {
   ICards,
   IDiscardCardRes,
+  IGroupCardRes,
   ILeaveTableRes,
   IPickCardFormOpenDackRes,
   IResuffalDataRes,
@@ -638,6 +640,37 @@ const formatPickCardFromOpenDeckData = async (
   }
 };
 
+const formatGroupCardData = async (
+  userId: string,
+  tableId: string,
+  cards: Array<ICards>,
+  totalScorePoint: number,
+  msg: string
+) => {
+  try {
+    const data: IGroupCardRes = {
+      userId,
+      tableId,
+      cards,
+      totalScorePoint,
+      msg,
+    };
+
+    const validatedGroupCardResponse: IGroupCardRes =
+      await groupCardResponseFormator(data);
+
+    return validatedGroupCardResponse;
+  } catch (error) {
+    Logger.error(
+      tableId,
+      `formatGroupCardData for table ${tableId} for user ${userId}`,
+      error
+    );
+    Logger.info(tableId, "formatGroupCardData() ERROR :::", error);
+    throw new Error(`formatGroupCardData() ERROR ::: ${error}`);
+  }
+};
+
 export {
   formateRejoinTableData,
   formateUpdatedGameTableData,
@@ -654,4 +687,5 @@ export {
   formatPickCardFormCloseDeckData,
   formatPickCardFromOpenDeckData,
   formatResuffalData,
+  formatGroupCardData,
 };

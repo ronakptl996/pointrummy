@@ -2,6 +2,7 @@ import { EVENT } from "../constants";
 import Logger from "../logger";
 import joinTable from "../services/playTable/joinTable";
 import discardCardHandler from "./discardCardHandler";
+import groupCardHandler from "./groupCardHandler";
 import pickCardFromCloseDackHandler from "./pickCardFromCloseDack";
 import pickCardFromOpenDeckHandler from "./pickCardFromOpenDeck";
 import signUpHandler from "./signUpHandler";
@@ -62,6 +63,10 @@ async function requestHandler(
 
       case EVENT.DISCARD_CARD_SOCKET_EVENT:
         response = await discardCardHandler(socket, body.data);
+        break;
+
+      case EVENT.GROUP_CARD_SOCKET_EVENT:
+        response = await groupCardHandler(socket, body.data);
         break;
     }
   } catch (error) {
