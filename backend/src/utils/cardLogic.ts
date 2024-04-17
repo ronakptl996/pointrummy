@@ -1,5 +1,51 @@
 import { NUMERICAL } from "../constants";
 
+const cardGroups = async (cards: string[]) => {
+  const spade: any[] = [];
+  const club: any[] = [];
+  const heart: any[] = [];
+  const diamond: any[] = [];
+  const joker: any[] = [];
+  const ArrayGroup: any[] = [];
+
+  cards.map((ele): void => {
+    let arr = ele.split("_");
+    if (arr[NUMERICAL.ZERO] == "S") {
+      spade.push(ele);
+    }
+    if (arr[NUMERICAL.ZERO] == "C") {
+      club.push(ele);
+    }
+    if (arr[NUMERICAL.ZERO] == "H") {
+      heart.push(ele);
+    }
+    if (arr[NUMERICAL.ZERO] == "D") {
+      diamond.push(ele);
+    }
+    if (arr[NUMERICAL.ZERO] == "J") {
+      joker.push(ele);
+    }
+  });
+
+  if (spade.length != NUMERICAL.ZERO) {
+    ArrayGroup.push(spade);
+  }
+  if (club.length != NUMERICAL.ZERO) {
+    ArrayGroup.push(club);
+  }
+  if (heart.length != NUMERICAL.ZERO) {
+    ArrayGroup.push(heart);
+  }
+  if (diamond.length != NUMERICAL.ZERO) {
+    ArrayGroup.push(diamond);
+  }
+  if (joker.length != NUMERICAL.ZERO) {
+    ArrayGroup.push(joker);
+  }
+
+  return ArrayGroup;
+};
+
 const sortCard = (cardsArr: string[]) => {
   let numArr: any[] = [];
   let numArr_with_index: any[] = [];
@@ -250,4 +296,4 @@ const isSet = (card: string[]) => {
   }
 };
 
-export { sortCard, isPure, isImpure, isSet };
+export { sortCard, isPure, isImpure, isSet, cardGroups };

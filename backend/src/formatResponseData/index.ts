@@ -5,6 +5,7 @@ import { userProfileCache, playerGamePlayCache } from "../cache";
 import { diffSeconds } from "../common";
 import { NUMERICAL, TABLE_STATE } from "../constants";
 import {
+  cardSortsResponseFormator,
   discardCardResponseFormator,
   groupCardResponseFormator,
   gtiResponseFormator,
@@ -38,6 +39,7 @@ import {
   ITosscard,
 } from "../interfaces/round";
 import {
+  ICardSortsRes,
   ICards,
   IDiscardCardRes,
   IGroupCardRes,
@@ -671,6 +673,34 @@ const formatGroupCardData = async (
   }
 };
 
+const formatCardsSortsData = async (
+  userId: string,
+  tableId: string,
+  cards: Array<ICards>,
+  totalScorePoint: number
+) => {
+  try {
+    const data: ICardSortsRes = {
+      userId,
+      tableId,
+      cards,
+      totalScorePoint,
+    };
+
+    const validatedCardSortsResponse: ICardSortsRes =
+      await cardSortsResponseFormator(data);
+    return validatedCardSortsResponse;
+  } catch (error) {
+    Logger.error(
+      tableId,
+      `formatedCardGroupsData for table ${tableId} for user ${userId}`,
+      error
+    );
+    Logger.info(tableId, "formatedCardGroupsData() ERROR :::", error);
+    throw new Error(`formatedCardGroupsData() ERROR ::: ${error}`);
+  }
+};
+
 export {
   formateRejoinTableData,
   formateUpdatedGameTableData,
@@ -688,4 +718,5 @@ export {
   formatPickCardFromOpenDeckData,
   formatResuffalData,
   formatGroupCardData,
+  formatCardsSortsData,
 };

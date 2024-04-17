@@ -101,3 +101,16 @@ export interface IGroupCardRes {
   totalScorePoint: number;
   msg: string;
 }
+
+// save card in group Request & Response
+export interface ISaveCardsInSortsInput {
+  userId: string;
+  tableId: string;
+  currentRound: number;
+}
+export interface ICardSortsRes {
+  userId: string;
+  tableId: string;
+  cards: Array<ICards>;
+  totalScorePoint: number;
+}

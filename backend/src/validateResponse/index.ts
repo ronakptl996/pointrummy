@@ -20,6 +20,7 @@ import setDealerResponseValidator from "../validators/responseValidator/setDeale
 import providedCardsValidator from "../validators/responseValidator/providedCardsValidator";
 import userTurnResponseValidator from "../validators/responseValidator/userTurnResponse";
 import {
+  ICardSortsRes,
   IDiscardCardRes,
   IGroupCardRes,
   ILeaveTableRes,
@@ -32,6 +33,7 @@ import scoreBoardValidator from "../validators/responseValidator/scoreBoardRes";
 import pickCardResponseValidator from "../validators/responseValidator/pickCardResponseValidator";
 import reshuffaleResponseValidator from "../validators/responseValidator/reshuffalResponse";
 import groupCardResponseValidator from "../validators/responseValidator/groupCardResponse";
+import cardSortsResponseValidator from "../validators/responseValidator/cardSortsResponseValidator";
 
 const gtiResponseFormator = async (
   gtiResponse: INewGTIResponse
@@ -190,6 +192,17 @@ const groupCardResponseFormator = async (groupCardData: IGroupCardRes) => {
   }
 };
 
+const cardSortsResponseFormator = async (cardSortsData: ICardSortsRes) => {
+  const tableId = cardSortsData.tableId;
+  try {
+    Joi.assert(cardSortsData, cardSortsResponseValidator());
+    return cardSortsData;
+  } catch (error) {
+    Logger.error(tableId, error, "-", cardSortsData);
+    throw new Error(`cardGroupsResponseFormator() Error :: ${error}`);
+  }
+};
+
 export {
   gtiResponseFormator,
   joinTableResponseFormator,
@@ -204,4 +217,5 @@ export {
   pickCardResponseFormator,
   reshuffaleResponseFormator,
   groupCardResponseFormator,
+  cardSortsResponseFormator,
 };

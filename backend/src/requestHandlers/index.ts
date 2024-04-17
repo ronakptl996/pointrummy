@@ -5,6 +5,7 @@ import discardCardHandler from "./discardCardHandler";
 import groupCardHandler from "./groupCardHandler";
 import pickCardFromCloseDackHandler from "./pickCardFromCloseDack";
 import pickCardFromOpenDeckHandler from "./pickCardFromOpenDeck";
+import saveCardsInSortsHandler from "./saveCardsInSorts";
 import signUpHandler from "./signUpHandler";
 
 async function requestHandler(
@@ -67,6 +68,10 @@ async function requestHandler(
 
       case EVENT.GROUP_CARD_SOCKET_EVENT:
         response = await groupCardHandler(socket, body.data);
+        break;
+
+      case EVENT.SAVE_CARDS_IN_SORTS_SOCKET_EVENT:
+        response = await saveCardsInSortsHandler(socket, body.data);
         break;
     }
   } catch (error) {

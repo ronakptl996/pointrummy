@@ -8,12 +8,14 @@ import {
   ILeaveTableInput,
   IPickCardFormOpenDackInput,
   IPickCardFromCloseDackInput,
+  ISaveCardsInSortsInput,
 } from "../interfaces/inputOutputDataFormator";
 import leaveTableValidator from "../validators/requestValidator/leaveTable";
 import pickCardFromCloseDackValidator from "../validators/requestValidator/pickCardFromCloseDack";
 import pickCardFromOpenDeckValidator from "../validators/requestValidator/pickCardFromOpenDeck";
 import discardCardValidator from "../validators/requestValidator/discardCard";
 import groupCardValidator from "../requestValidator/groupCard";
+import saveCardsInSortsValidator from "../validators/requestValidator/saveCardsInSort";
 
 const signUpFormator = async (
   signUpData: ISignUpInput
@@ -75,6 +77,15 @@ const groupCardFormator = async (groupCard: IGroupCardInput) => {
   }
 };
 
+const saveCardsInSortsFormator = (saveCards: ISaveCardsInSortsInput) => {
+  try {
+    Joi.assert(saveCards, saveCardsInSortsValidator());
+    return saveCards;
+  } catch (error) {
+    throw new Errors.InvalidInput(error);
+  }
+};
+
 export {
   signUpFormator,
   leaveTableFormator,
@@ -82,4 +93,5 @@ export {
   pickCardFromOpenDeckFormator,
   discardCardDataFormator,
   groupCardFormator,
+  saveCardsInSortsFormator,
 };
