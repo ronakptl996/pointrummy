@@ -180,6 +180,16 @@ const endDragCard = (payload: any) => {
   sendEventToClient(socket, responseData, tableId);
 };
 
+const declareEvent = (payload: any) => {
+  const { socket, data, tableId } = payload;
+  const responseData = {
+    eventName: EVENT.DECLARE_SOCKET_EVENT,
+    data,
+  };
+  Logger.debug(tableId, "SEND EVENT TO TABLE :: ", responseData);
+  sendEventToRoom(tableId, responseData);
+};
+
 commonEventEmitter.on(EVENT.SHOW_POPUP_CLIENT_SOCKET_EVENT, popUpEventClient);
 
 commonEventEmitter.on(EVENT.ADD_PLAYER_IN_TABLE, addPlayerInTable);
@@ -250,3 +260,12 @@ commonEventEmitter.on(EVENT.DISCARD_CARD_SOCKET_EVENT, discardCard);
 commonEventEmitter.on(EVENT.GROUP_CARD_SOCKET_EVENT, groupCard);
 
 commonEventEmitter.on(EVENT.END_DRAG_SOCKET_EVENT, endDragCard);
+
+commonEventEmitter.on(
+  EVENT_EMITTER.DACLARE_PLAYER_TURN_TIMER_EXPIRED,
+  (res) => {
+    // DeclareHandler
+  }
+);
+
+commonEventEmitter.on(EVENT.DECLARE_SOCKET_EVENT, declareEvent);

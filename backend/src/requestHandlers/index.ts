@@ -4,6 +4,7 @@ import joinTable from "../services/playTable/joinTable";
 import discardCardHandler from "./discardCardHandler";
 import endDragCardHandler from "./endDragCardHandler";
 import groupCardHandler from "./groupCardHandler";
+import openDeckCardsHandler from "./openDeckCardsHandler";
 import pickCardFromCloseDackHandler from "./pickCardFromCloseDack";
 import pickCardFromOpenDeckHandler from "./pickCardFromOpenDeck";
 import saveCardsInSortsHandler from "./saveCardsInSorts";
@@ -78,6 +79,12 @@ async function requestHandler(
       case EVENT.END_DRAG_SOCKET_EVENT:
         response = await endDragCardHandler(socket, body.data);
         break;
+
+      case EVENT.SHOW_OPENDECK_CARDS_EVENT:
+        response = await openDeckCardsHandler(socket, body.data);
+        break;
+
+      // finishHandler
     }
   } catch (error) {
     Logger.error("requestHandler ERROR :: >> ", error);

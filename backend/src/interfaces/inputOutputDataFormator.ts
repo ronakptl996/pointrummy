@@ -131,3 +131,51 @@ export interface IEndDragCardResponse {
   cards: Array<ICards>;
   totalScorePoint: number;
 }
+
+// openDeck Cards in Request & Response
+export interface IOpenDeckCardsInput {
+  userId: string;
+  tableId: string;
+  currentRound: number;
+}
+
+export interface IOpenDeckCardsRes {
+  userId: string;
+  tableId: string;
+  currentRound: number;
+  openDeckCards: Array<string>;
+}
+
+// finish in Request & Response
+export interface IFinishInput {
+  userId: string;
+  tableId: string;
+  currentRound: number;
+  finishCard: Array<IGroupCards>;
+}
+export interface IFinishResponse {
+  currentTurnUserId: string;
+  currentTurnSI: number;
+  turnTimer: number;
+  cards: Array<ICards>;
+  totalScorePoint: number;
+  finishDeck: Array<string>;
+  tableId: string;
+}
+
+// declare Data in Request & Response
+export interface IDeclareDataInput {
+  userId: string;
+  tableId: string;
+  currentRound: number;
+}
+
+export interface IDeclareDataResponse {
+  tableId: string;
+  declareUserId: string;
+  declareSI: number;
+  declareTimer: number;
+  siArrayOfdeclaringTimeStart: Array<number>;
+  message: string;
+  tableState: string;
+}

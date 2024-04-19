@@ -21,10 +21,13 @@ import providedCardsValidator from "../validators/responseValidator/providedCard
 import userTurnResponseValidator from "../validators/responseValidator/userTurnResponse";
 import {
   ICardSortsRes,
+  IDeclareDataResponse,
   IDiscardCardRes,
   IEndDragCardResponse,
+  IFinishResponse,
   IGroupCardRes,
   ILeaveTableRes,
+  IOpenDeckCardsRes,
   IPickCardFormCloseDackResponse,
   IResuffalDataRes,
 } from "../interfaces/inputOutputDataFormator";
@@ -36,6 +39,9 @@ import reshuffaleResponseValidator from "../validators/responseValidator/reshuff
 import groupCardResponseValidator from "../validators/responseValidator/groupCardResponse";
 import cardSortsResponseValidator from "../validators/responseValidator/cardSortsResponseValidator";
 import endDragCardResponseValidator from "../validators/responseValidator/endDragCardResponse";
+import openDeckCardsResponseValidator from "../validators/responseValidator/openDeckCardsResponse";
+import finishResponseValidator from "../validators/responseValidator/finishResValidator";
+import declareResponseValidator from "../validators/responseValidator/declareResponse";
 
 const gtiResponseFormator = async (
   gtiResponse: INewGTIResponse
@@ -218,6 +224,43 @@ const endDragCardDataResponseFormator = async (
   }
 };
 
+const opendDeckCardsResponseFormator = async (
+  openDeckCardsData: IOpenDeckCardsRes
+) => {
+  const tableId = openDeckCardsData.tableId;
+  try {
+    Joi.assert(openDeckCardsData, openDeckCardsResponseValidator());
+    return openDeckCardsData;
+  } catch (error) {
+    Logger.error(tableId, error, "-", openDeckCardsData);
+    throw new Error(`openDeckCardsResponseFormator() Error :: ${error}`);
+  }
+};
+
+const finishStartUserTurnResponseFormator = async (
+  finishData: IFinishResponse
+) => {
+  const tableId = finishData.tableId;
+  try {
+    Joi.assert(finishData, finishResponseValidator());
+    return finishData;
+  } catch (error) {
+    Logger.error(tableId, error, "-", finishData);
+    throw new Error(`FinishStartUserTurnResponseFormator() Error :: ${error}`);
+  }
+};
+
+const declareResponseFormator = (declareData: IDeclareDataResponse) => {
+  const tableId = declareData.tableId;
+  try {
+    Joi.assert(declareData, declareResponseValidator());
+    return declareData;
+  } catch (error) {
+    Logger.error(tableId, error, "-", declareData);
+    throw new Error(`FinishStartUserTurnResponseFormator() Error :: ${error}`);
+  }
+};
+
 export {
   gtiResponseFormator,
   joinTableResponseFormator,
@@ -234,4 +277,7 @@ export {
   groupCardResponseFormator,
   cardSortsResponseFormator,
   endDragCardDataResponseFormator,
+  opendDeckCardsResponseFormator,
+  finishStartUserTurnResponseFormator,
+  declareResponseFormator,
 };

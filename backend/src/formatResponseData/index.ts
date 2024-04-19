@@ -6,12 +6,15 @@ import { diffSeconds } from "../common";
 import { NUMERICAL, TABLE_STATE } from "../constants";
 import {
   cardSortsResponseFormator,
+  declareResponseFormator,
   discardCardResponseFormator,
   endDragCardDataResponseFormator,
+  finishStartUserTurnResponseFormator,
   groupCardResponseFormator,
   gtiResponseFormator,
   joinTableResponseFormator,
   leaveTableFormator,
+  opendDeckCardsResponseFormator,
   pickCardResponseFormator,
   providedCardResponseFormator,
   reshuffaleResponseFormator,
@@ -42,10 +45,13 @@ import {
 import {
   ICardSortsRes,
   ICards,
+  IDeclareDataResponse,
   IDiscardCardRes,
   IEndDragCardResponse,
+  IFinishResponse,
   IGroupCardRes,
   ILeaveTableRes,
+  IOpenDeckCardsRes,
   IPickCardFormOpenDackRes,
   IResuffalDataRes,
 } from "../interfaces/inputOutputDataFormator";
@@ -733,6 +739,107 @@ const formatEndDragCardData = async (
   }
 };
 
+const formatOpenDeckCardsData = async (
+  userId: string,
+  tableId: string,
+  openDeckCards: string[]
+) => {
+  try {
+    const data: IOpenDeckCardsRes = {
+      userId,
+      tableId,
+      currentRound: NUMERICAL.ONE,
+      openDeckCards,
+    };
+
+    const validatedOpenDeckCardsResponse: IOpenDeckCardsRes =
+      await opendDeckCardsResponseFormator(data);
+    return validatedOpenDeckCardsResponse;
+  } catch (error) {
+    Logger.error(
+      tableId,
+      `openDeckCardsResponseFormator for table ${tableId} for user ${userId}`,
+      error
+    );
+    Logger.info(tableId, "openDeckCardsResponseFormator() ERROR :::", error);
+    throw new Error(`openDeckCardsResponseFormator() ERROR ::: ${error}`);
+  }
+};
+
+const formatFinishStartUserTurn = async (
+  declareTimer: number,
+  currentTurnUserId: string,
+  currentTurnSI: number,
+  cards: Array<ICards>,
+  totalScorePoint: number,
+  finishDeck: string[],
+  tableId: string
+) => {
+  try {
+    const data: IFinishResponse = {
+      currentTurnUserId,
+      currentTurnSI,
+      turnTimer: declareTimer / NUMERICAL.THOUSAND,
+      cards,
+      totalScorePoint,
+      finishDeck,
+      tableId,
+    };
+
+    const validatedFinishResponse: IFinishResponse =
+      await finishStartUserTurnResponseFormator(data);
+
+    return validatedFinishResponse;
+  } catch (error) {
+    Logger.error(
+      tableId,
+      `FinishStartUserTurnResponseFormator for user ${currentTurnUserId}`,
+      error
+    );
+    Logger.info(
+      tableId,
+      "FinishStartUserTurnResponseFormator() ERROR :::",
+      error
+    );
+    throw new Error(`FinishStartUserTurnResponseFormator() ERROR ::: ${error}`);
+  }
+};
+
+const formatDeclareData = async (
+  tableId: string,
+  declareUserId: string,
+  declareSI: number,
+  declareTimer: number,
+  siArrayOfdeclaringTimeStart: Array<number>,
+  message: string,
+  tableState: string
+) => {
+  try {
+    const data: IDeclareDataResponse = {
+      tableId,
+      declareUserId,
+      declareSI,
+      declareTimer: declareTimer / NUMERICAL.THOUSAND,
+      siArrayOfdeclaringTimeStart,
+      message,
+      tableState,
+    };
+
+    const validatedDeclareResponse: IDeclareDataResponse =
+      await declareResponseFormator(data);
+
+    return validatedDeclareResponse;
+  } catch (error: any) {
+    Logger.error(
+      tableId,
+      `declareResponseFormator for user ${declareUserId}`,
+      error
+    );
+    Logger.info(tableId, "declareResponseFormator() ERROR :::", error);
+    throw new Error(`declareResponseFormator() ERROR ::: ${error}`);
+  }
+};
+
 export {
   formateRejoinTableData,
   formateUpdatedGameTableData,
@@ -752,4 +859,7 @@ export {
   formatGroupCardData,
   formatCardsSortsData,
   formatEndDragCardData,
+  formatOpenDeckCardsData,
+  formatFinishStartUserTurn,
+  formatDeclareData,
 };
