@@ -4,6 +4,7 @@ import signupFormatorValidator from "../requestValidator/signup";
 import { ISignUpInput } from "../interfaces/signup";
 import {
   IDiscardCardInput,
+  IEndDragCardInput,
   IGroupCardInput,
   ILeaveTableInput,
   IPickCardFormOpenDackInput,
@@ -16,6 +17,7 @@ import pickCardFromOpenDeckValidator from "../validators/requestValidator/pickCa
 import discardCardValidator from "../validators/requestValidator/discardCard";
 import groupCardValidator from "../requestValidator/groupCard";
 import saveCardsInSortsValidator from "../validators/requestValidator/saveCardsInSort";
+import endDragCardValidator from "../validators/requestValidator/endDragCard";
 
 const signUpFormator = async (
   signUpData: ISignUpInput
@@ -86,6 +88,15 @@ const saveCardsInSortsFormator = (saveCards: ISaveCardsInSortsInput) => {
   }
 };
 
+const endDragCardFormator = async (endDragCard: IEndDragCardInput) => {
+  try {
+    Joi.assert(endDragCard, endDragCardValidator());
+    return endDragCard;
+  } catch (error) {
+    throw new Errors.InvalidInput(error);
+  }
+};
+
 export {
   signUpFormator,
   leaveTableFormator,
@@ -94,4 +105,5 @@ export {
   discardCardDataFormator,
   groupCardFormator,
   saveCardsInSortsFormator,
+  endDragCardFormator,
 };

@@ -7,6 +7,7 @@ import { NUMERICAL, TABLE_STATE } from "../constants";
 import {
   cardSortsResponseFormator,
   discardCardResponseFormator,
+  endDragCardDataResponseFormator,
   groupCardResponseFormator,
   gtiResponseFormator,
   joinTableResponseFormator,
@@ -42,6 +43,7 @@ import {
   ICardSortsRes,
   ICards,
   IDiscardCardRes,
+  IEndDragCardResponse,
   IGroupCardRes,
   ILeaveTableRes,
   IPickCardFormOpenDackRes,
@@ -701,6 +703,36 @@ const formatCardsSortsData = async (
   }
 };
 
+const formatEndDragCardData = async (
+  userId: string,
+  tableId: string,
+  cards: Array<ICards>,
+  totalScorePoint: number
+) => {
+  try {
+    const data: IEndDragCardResponse = {
+      userId,
+      tableId,
+      cards,
+      totalScorePoint,
+    };
+
+    const validatedEndDragCardResponse = await endDragCardDataResponseFormator(
+      data
+    );
+
+    return validatedEndDragCardResponse;
+  } catch (error) {
+    Logger.error(
+      tableId,
+      `formatedEndDragCardData for table ${tableId} for user ${userId}`,
+      error
+    );
+    Logger.info(tableId, "formatedEndDragCardData() ERROR :::", error);
+    throw new Error(`formatedEndDragCardData() ERROR ::: ${error}`);
+  }
+};
+
 export {
   formateRejoinTableData,
   formateUpdatedGameTableData,
@@ -719,4 +751,5 @@ export {
   formatResuffalData,
   formatGroupCardData,
   formatCardsSortsData,
+  formatEndDragCardData,
 };

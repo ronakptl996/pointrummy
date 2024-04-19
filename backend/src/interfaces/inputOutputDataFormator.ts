@@ -114,3 +114,20 @@ export interface ICardSortsRes {
   cards: Array<ICards>;
   totalScorePoint: number;
 }
+
+// endDragCard in Request & Response
+export interface IEndDragCardInput {
+  userId: string;
+  tableId: string;
+  currentRound: number;
+  cards: Array<IGroupCards>;
+  destinationGroupIndex: number;
+  cardIndexInGroup: number;
+}
+
+export interface IEndDragCardResponse {
+  userId: string;
+  tableId: string;
+  cards: Array<ICards>;
+  totalScorePoint: number;
+}

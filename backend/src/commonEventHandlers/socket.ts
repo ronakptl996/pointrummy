@@ -138,6 +138,48 @@ const pickCardFromOpendDack = (payload: any) => {
   sendEventToRoom(tableId, responseData);
 };
 
+const groupCard = (payload: any) => {
+  const { socket, data, tableId } = payload;
+  const responseData = {
+    eventName: EVENT.GROUP_CARD_SOCKET_EVENT,
+    data,
+  };
+
+  Logger.debug(tableId, "SEND EVENT TO CLIENT :: ", responseData);
+  sendEventToClient(socket, responseData, tableId);
+};
+
+const discardCard = (payload: any) => {
+  const { tableId, data } = payload;
+  const responseData = {
+    eventName: EVENT.DISCARD_CARD_SOCKET_EVENT,
+    data,
+  };
+  Logger.debug(tableId, "SEND EVENT TO TABLE :: ", responseData);
+  sendEventToRoom(tableId, responseData);
+};
+
+const saveCardInSorts = (payload: any) => {
+  const { socket, data, tableId } = payload;
+  const responseData = {
+    eventName: EVENT.SAVE_CARDS_IN_SORTS_SOCKET_EVENT,
+    data,
+  };
+  Logger.debug(tableId, "SEND EVENT TO CLIENT :: ", responseData);
+  sendEventToClient(socket, responseData, tableId);
+};
+
+const endDragCard = (payload: any) => {
+  const { socket, data, tableId } = payload;
+  const responseData = {
+    eventName: EVENT.END_DRAG_SOCKET_EVENT,
+    data,
+  };
+
+  Logger.debug(tableId, "SEND EVENT TO CLIENT :: ", responseData);
+  sendEventToClient(socket, responseData, tableId);
+};
+
 commonEventEmitter.on(EVENT.SHOW_POPUP_CLIENT_SOCKET_EVENT, popUpEventClient);
 
 commonEventEmitter.on(EVENT.ADD_PLAYER_IN_TABLE, addPlayerInTable);
@@ -200,3 +242,11 @@ commonEventEmitter.on(
   EVENT.PICK_FROM_OPEN_DECK_SOCKET_EVENT,
   pickCardFromOpendDack
 );
+
+commonEventEmitter.on(EVENT.SAVE_CARDS_IN_SORTS_SOCKET_EVENT, saveCardInSorts);
+
+commonEventEmitter.on(EVENT.DISCARD_CARD_SOCKET_EVENT, discardCard);
+
+commonEventEmitter.on(EVENT.GROUP_CARD_SOCKET_EVENT, groupCard);
+
+commonEventEmitter.on(EVENT.END_DRAG_SOCKET_EVENT, endDragCard);
