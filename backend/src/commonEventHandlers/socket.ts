@@ -11,6 +11,7 @@ import {
 } from "../services/initializeRound";
 import { changeTurn, secondaryTimer, startUserTurn } from "../services/turn";
 import onTurnExpire from "../services/turn/turnExpire";
+import declareHandler from "../requestHandlers/declareHandlers";
 
 interface IResponseData {
   eventName: string;
@@ -190,6 +191,16 @@ const declareEvent = (payload: any) => {
   sendEventToRoom(tableId, responseData);
 };
 
+const scoreBoardClientEvent = async (payload: any) => {
+  const { socket, data, tableId } = payload;
+  const responseData = {
+    eventName: EVENT.SCORE_BOARD_SOCKET_EVENT,
+    data,
+  };
+  Logger.debug(tableId, "SEND EVENT TO TABLE :: ", responseData);
+  sendEventToClient(socket, responseData, tableId);
+};
+
 commonEventEmitter.on(EVENT.SHOW_POPUP_CLIENT_SOCKET_EVENT, popUpEventClient);
 
 commonEventEmitter.on(EVENT.ADD_PLAYER_IN_TABLE, addPlayerInTable);
@@ -264,8 +275,13 @@ commonEventEmitter.on(EVENT.END_DRAG_SOCKET_EVENT, endDragCard);
 commonEventEmitter.on(
   EVENT_EMITTER.DACLARE_PLAYER_TURN_TIMER_EXPIRED,
   (res) => {
-    // DeclareHandler
+    declareHandler("_", res.data);
   }
 );
 
 commonEventEmitter.on(EVENT.DECLARE_SOCKET_EVENT, declareEvent);
+
+commonEventEmitter.on(
+  EVENT.SCORE_BOARD_CLIENT_SOCKET_EVENT,
+  scoreBoardClientEvent
+);

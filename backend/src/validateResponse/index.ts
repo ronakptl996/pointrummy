@@ -250,7 +250,7 @@ const finishStartUserTurnResponseFormator = async (
   }
 };
 
-const declareResponseFormator = (declareData: IDeclareDataResponse) => {
+const declareResponseFormator = async (declareData: IDeclareDataResponse) => {
   const tableId = declareData.tableId;
   try {
     Joi.assert(declareData, declareResponseValidator());
